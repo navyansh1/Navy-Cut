@@ -5,6 +5,7 @@ A Final Cut Pro–style video editor for macOS (Apple silicon), built as a fork 
 so everything is editable as code too.
 
 ## What it adds
+
 - **Final Cut timeline** — dark UI, blue/purple/green/teal clips, file-name labels, yellow selection,
   click anywhere to move the playhead, ⇧Z fit, ⌘B blade, J/K/L (and ⌘L) shuttle up to 16×, edge trims.
 - **Projects and timelines** — project picker with recents, New Project (16:9 / 9:16), Open Project,
@@ -22,14 +23,22 @@ so everything is editable as code too.
 - **Workspaces** — Standard and Vertical Video (viewer on the right), ⌘0 / ⌥⌘0.
 
 ## Install
+
 Clone this repo to `~/Library/Application Support/Cut Studio/hyperframes`, then run `navy-cut/install.sh`.
 It installs Bun dependencies, builds the packages, sets up the ML tools, registers the background server
 (LaunchAgent `com.navyansh.navycut.server`) and builds `/Applications/Navy Cut.app`.
 Double-click a `.navycut` project file or use File › Open Project.
 
 ## Layout
+
 - `packages/studio`, `packages/studio-server`, `packages/core` — the editor changes (search for “Cut Studio”).
 - `navy-cut/app` — native macOS wrapper (Swift, WKWebView).
 - `navy-cut/ml` — noise removal, multicam sync, scene detection, stabilizer.
 
 Licensed under Apache-2.0 like HyperFrames; see `LICENSE` and `NOTICE`.
+
+## Docs
+
+- [Progress and pending work](navy-cut/docs/PROGRESS.md)
+- [Learnings and gotchas](navy-cut/docs/LEARNINGS.md)
+- `navy-cut/docs/claude-skill` and `navy-cut/docs/claude-memory`: the Claude Code skill and memory notes used to build it.

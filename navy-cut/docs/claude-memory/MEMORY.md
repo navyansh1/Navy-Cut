@@ -1,0 +1,3 @@
+- [Recipe reel preferences](recipe-reel-preferences.md) — 25s max, Hindi VO by user, storyboard first, clean mix; use recipe-reel-short skill
+- [Video editing preferences](video-editing-preferences.md) — tech tone, cut-paper tech graphics, PiP right-centre, VO rules, render on Navy2TB
+- [Navy Cut editor](cut-studio-editor.md) — FCP-style HyperFrames fork + Mac app; details in navy-cut skill; open items
