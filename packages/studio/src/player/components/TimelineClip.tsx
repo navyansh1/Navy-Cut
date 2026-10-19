@@ -18,6 +18,7 @@ import { OutOfSyncBadge } from "./OutOfSyncBadge";
 import { clipSpeedSuffix } from "./clipToolAttrs";
 import { ClipPeakTooltip } from "./ClipPeakTooltip";
 import { timeLayerPercent } from "./TimelineTimeLayer";
+import { MulticamCutMarks } from "./MulticamCutMarks";
 
 interface TimelineClipProps {
   el: TimelineElement;
@@ -50,6 +51,7 @@ const HANDLES_MIN_PX = 32;
 /** Final Cut Pro clip colour family: blue video, green audio, purple titles/graphics, teal compound clips. */
 export function fcpClipKind(el: TimelineElement, isAudio: boolean, isComposition: boolean): string {
   if (isAudio) return "audio";
+  if (el.compositionSrc && /(^|\/)multicam-\d+\.html/.test(el.compositionSrc)) return "multicam";
   if (el.compositionSrc && /(^|\/)compound-/.test(el.compositionSrc)) return "compound";
   if (isComposition) return "title";
   if (el.tag === "img") return "still";
@@ -267,6 +269,7 @@ export const TimelineClip = memo(function TimelineClip({
           {startLabel}-{endLabel}s
         </span>
       )}
+      {el.compositionSrc && /(^|\/)multicam-\d+\.html/.test(el.compositionSrc) && <MulticamCutMarks el={el} />}
       <ClipFadesContext.Provider value={hasFades ? fade.shape : null}>
         {children}
       </ClipFadesContext.Provider>

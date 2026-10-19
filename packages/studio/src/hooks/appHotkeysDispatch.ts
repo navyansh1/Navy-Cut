@@ -8,6 +8,7 @@ import { isEditableTarget } from "../utils/timelineDiscovery";
 import { shouldIgnoreHistoryShortcut } from "../utils/studioHelpers";
 import { canSplitElement, canSplitElementAt } from "../utils/timelineElementSplit";
 import { breakApartCompoundClip, makeCompoundClip } from "../utils/cutCompoundClips";
+import { makeMulticamClip, switchMulticamAngle } from "../utils/cutMulticam";
 import {
   snapshotCopiedAttributes,
   usePasteAttributesStore,
@@ -97,6 +98,17 @@ export function dispatchModifierKey(
     event.preventDefault();
     trackStudioEvent("keyboard_shortcut", { action: "tab_assets" });
     useDockLayoutStore.getState().activatePanel("assets");
+    return true;
+  }
+
+  // ⇧⌘M: New Multicam Clip from the selected angles.
+  if (key === "m" && event.shiftKey && !event.altKey && !isTypingTarget(event.target)) {
+    event.preventDefault();
+    if (cb.readOnlyPreview) return true;
+    cb.showToast("Syncing angles by audio…", "info");
+    void makeMulticamClip()
+      .then((msg) => cb.showToast(msg, "info"))
+      .catch((e: Error) => cb.showToast(e.message, "error"));
     return true;
   }
 
@@ -238,6 +250,17 @@ export function dispatchPlainKey(event: KeyboardEvent, key: string, cb: HotkeyCa
       event.preventDefault();
       return;
     }
+  }
+
+  // Final Cut multicam: 1–4 cut & switch the angle at the playhead, ⇧1–4 choose the audio angle.
+  if (!event.altKey && /^Digit[1-4]$/.test(event.code)) {
+    const angle = Number(event.code.slice(5));
+    event.preventDefault();
+    if (cb.readOnlyPreview) return;
+    void switchMulticamAngle(angle, event.shiftKey)
+      .then((msg) => msg && cb.showToast(msg, "info"))
+      .catch((e: Error) => cb.showToast(e.message, "error"));
+    return;
   }
 
   // Final Cut: ⌥G makes a compound clip from the selection.

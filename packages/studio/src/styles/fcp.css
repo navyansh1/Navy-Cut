@@ -76,3 +76,8 @@
   border-radius: 0 !important;
   background: var(--fcp-select) !important;
 }
+
+/* Multicam clips: FCP draws them as video with an angle strip. */
+.timeline-clip[data-fcp-kind="multicam"] { background-color: #35518a; }
+.timeline-clip[data-fcp-kind="multicam"] .timeline-clip__label { background: #2a4170; }
+.timeline-clip[data-fcp-kind="multicam"] .timeline-clip__name::before { content: "▦ "; }
