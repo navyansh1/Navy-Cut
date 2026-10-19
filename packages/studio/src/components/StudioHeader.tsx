@@ -49,7 +49,10 @@ export const StudioHeader = memo(function StudioHeader({
   const ffmpegMissing = renderQueue.ffmpegMissing;
 
   return (
-    <div className="flex items-center justify-between h-10 px-3 bg-surface border-b border-border-strong shrink-0">
+    <div
+      data-studio-header=""
+      className="flex items-center justify-between h-10 px-3 bg-surface border-b border-border-strong shrink-0"
+    >
       {/* Left: logo + project name */}
       <div className="flex items-center gap-3">
         <span className="text-step-11 font-medium text-text-1">{projectId}</span>

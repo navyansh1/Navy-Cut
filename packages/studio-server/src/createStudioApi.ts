@@ -6,6 +6,7 @@ import { registerPreviewRoutes } from "./routes/preview.js";
 import { registerLintRoutes } from "./routes/lint.js";
 import { registerRenderRoutes } from "./routes/render.js";
 import { registerCutCompoundRoutes } from "./routes/cutCompound.js";
+import { registerCutAudioRoutes } from "./routes/cutAudio.js";
 import { registerImageThumbnailRoutes } from "./routes/imageThumbnail.js";
 import { registerThumbnailRoutes } from "./routes/thumbnail.js";
 import { registerWaveformRoutes } from "./routes/waveform.js";
@@ -70,6 +71,7 @@ export function createStudioApi(adapter: StudioApiAdapter): Hono {
   registerLintRoutes(api, adapter);
   registerRenderRoutes(api, adapter);
   registerCutCompoundRoutes(api, adapter);
+  registerCutAudioRoutes(api, adapter);
   registerThumbnailRoutes(api, adapter);
   registerImageThumbnailRoutes(api, adapter);
   registerSelectionRoutes(api, adapter);

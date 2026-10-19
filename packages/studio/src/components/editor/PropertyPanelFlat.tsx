@@ -28,6 +28,7 @@ import { formatTextFieldPreview } from "./propertyPanelSections";
 import { useColorGradingController } from "./useColorGradingController";
 import { usePlayerStore } from "../../player";
 import { isFocusedEaseRequestCurrent } from "../../player/store/keyframeSlice";
+import { AudioEnhancementsPanel } from "./AudioEnhancementsPanel";
 import {
   FlatColorGradingAccessory,
   FlatColorGradingSection,
@@ -137,6 +138,8 @@ export function PropertyPanelFlat({
   const [openGroupId, setOpenGroupId] = useState<string>(() =>
     isFootage && sections.colorGrading
       ? "grade"
+      : /^audio$/i.test(element.tagName) && sections.audioFx
+        ? "audio-fx"
       : isTextEditableSelection(element)
       ? "text"
       : showEditableSections
@@ -499,12 +502,19 @@ export function PropertyPanelFlat({
       title: "Audio",
       summary: audioFxSummary(element, audioGroupLabel),
       content: (
+        <>
+        <AudioEnhancementsPanel
+          element={element}
+          onSetAttributeQuiet={(onSetAttributeQuiet ?? onSetAttributeLive)!}
+          onSetHtmlAttribute={forwardedProps.onSetHtmlAttribute}
+        />
         <AudioFxGroup
           element={element}
           onSetAttributeQuiet={onSetAttributeQuiet ?? onSetAttributeLive}
           onSetAttributeLive={onSetAttributeLive}
           onAutoGroupCarveSources={onAutoGroupCarveSources}
         />
+        </>
       ),
     });
   }
