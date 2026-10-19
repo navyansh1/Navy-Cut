@@ -132,8 +132,12 @@ export function PropertyPanelFlat({
   ...forwardedProps
 }: PropertyPanelFlatProps) {
   // PropertyPanel keys this component by selection, so the default is per element.
+  // Cut Studio: footage opens on Color, like Final Cut's Color inspector.
+  const isFootage = /^(video|img)$/i.test(element.tagName);
   const [openGroupId, setOpenGroupId] = useState<string>(() =>
-    isTextEditableSelection(element)
+    isFootage && sections.colorGrading
+      ? "grade"
+      : isTextEditableSelection(element)
       ? "text"
       : showEditableSections
         ? "style"
@@ -337,7 +341,7 @@ export function PropertyPanelFlat({
       ),
     });
   }
-  if (showEditableSections) {
+  if (showEditableSections && !isFootage) {
     const opacityValue = parseFloat(styles.opacity ?? "1");
     const opacityPct = Math.round((Number.isFinite(opacityValue) ? opacityValue : 1) * 100);
     groups.push({
@@ -428,7 +432,7 @@ export function PropertyPanelFlat({
   if (sections.colorGrading) {
     groups.push({
       id: "grade",
-      title: "Grade",
+      title: "Color",
       accessory: <FlatColorGradingAccessory state={colorGradingController} />,
       summary: `${colorGradingController.grading.preset ?? "neutral"} · ${Math.round(colorGradingController.grading.intensity * 100)}%`,
       content: (
@@ -492,7 +496,7 @@ export function PropertyPanelFlat({
   if (sections.audioFx) {
     groups.push({
       id: "audio-fx",
-      title: "Audio FX",
+      title: "Audio",
       summary: audioFxSummary(element, audioGroupLabel),
       content: (
         <AudioFxGroup

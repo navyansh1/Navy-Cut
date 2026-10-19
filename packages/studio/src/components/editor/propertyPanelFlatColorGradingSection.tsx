@@ -32,6 +32,7 @@ import {
 } from "./propertyPanelColorGradingControls";
 import { PropertyPanelColorScopes } from "./propertyPanelColorScopes";
 import { PropertyPanelColorSecondary } from "./propertyPanelColorSecondary";
+// Cut Studio hides the wheels (FCP Color Adjustments sliders instead).
 import { ColorWheels } from "./propertyPanelColorWheels";
 
 export { FlatColorGradingAccessory } from "./propertyPanelFlatColorGradingAccessory";
@@ -202,6 +203,36 @@ export function FlatColorGradingSection({
   return (
     <div className="space-y-1.5">
       <HdrBanner metadata={mediaMetadata} />
+      <div className="space-y-0.5 pb-1.5">
+        <div className="mb-1 text-[9px] font-semibold uppercase tracking-[0.12em] text-panel-text-5">
+          Color Adjustments
+        </div>
+        {COLOR_GRADING_ADJUST_SLIDERS.map((slider) => {
+          const rawPercent = grading.adjust[slider.key] * slider.scale;
+          const isSet = Math.abs(grading.adjust[slider.key]) > 1e-6;
+          return (
+            <div key={slider.key} data-flat-grade-adjust="true">
+              <FlatSlider
+                label={slider.label}
+                value={rawPercent}
+                min={slider.min}
+                max={slider.max}
+                step={slider.step}
+                tier={isSet ? "explicitCustom" : "default"}
+                displayValue={formatAdjustValue(slider.key, rawPercent)}
+                centerTick
+                onCommit={(next) =>
+                  onCommitColorGrading(
+                    colorGradingWithAdjust(grading, slider.key, next / slider.scale),
+                  )
+                }
+                onReset={() => onCommitColorGrading(colorGradingWithAdjust(grading, slider.key, 0))}
+              />
+            </div>
+          );
+        })}
+      </div>
+
       <PropertyPanelColorScopes
         captureFrame={() => captureGradedFrame()}
         refreshKey={scopesRefreshKey}
@@ -277,59 +308,6 @@ export function FlatColorGradingSection({
         onCommit={actions.setIntensityPercent}
         onReset={() => actions.setIntensityPercent(100)}
       />
-
-      <div className="space-y-0.5 border-t border-panel-hairline pt-1.5">
-        <div className="mb-1 text-[9px] font-semibold uppercase tracking-[0.12em] text-panel-text-5">
-          Primary
-        </div>
-        {COLOR_GRADING_ADJUST_SLIDERS.map((slider) => {
-          const rawPercent = grading.adjust[slider.key] * slider.scale;
-          const isSet = Math.abs(grading.adjust[slider.key]) > 1e-6;
-          return (
-            <div key={slider.key} data-flat-grade-adjust="true">
-              <FlatSlider
-                label={slider.label}
-                value={rawPercent}
-                min={slider.min}
-                max={slider.max}
-                step={slider.step}
-                tier={isSet ? "explicitCustom" : "default"}
-                displayValue={formatAdjustValue(slider.key, rawPercent)}
-                centerTick
-                onCommit={(next) =>
-                  onCommitColorGrading(
-                    colorGradingWithAdjust(grading, slider.key, next / slider.scale),
-                  )
-                }
-                onReset={() => onCommitColorGrading(colorGradingWithAdjust(grading, slider.key, 0))}
-              />
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="space-y-1.5 border-t border-panel-hairline pt-1.5">
-        <div className="mb-1 text-[9px] font-semibold uppercase tracking-[0.12em] text-panel-text-5">
-          Color wheels
-        </div>
-        <ColorWheels
-          value={resolvedGrading.wheels}
-          onPreview={(wheels) =>
-            onPreviewColorGrading({
-              ...grading,
-              intensity: visibleColorGradingIntensity(grading),
-              wheels,
-            })
-          }
-          onCommit={(wheels) =>
-            onCommitColorGrading({
-              ...grading,
-              intensity: visibleColorGradingIntensity(grading),
-              wheels,
-            })
-          }
-        />
-      </div>
 
       <div className="space-y-1.5 border-t border-panel-hairline pt-1.5">
         <div className="mb-1 text-[9px] font-semibold uppercase tracking-[0.12em] text-panel-text-5">
