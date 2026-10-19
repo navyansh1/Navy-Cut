@@ -6,6 +6,7 @@ import type { BlockedTimelineEditIntent } from "../../player/components/timeline
 import { AudioMeterStrip } from "./AudioMeterStrip";
 import { useTimelineEditContext } from "../../contexts/TimelineEditContext";
 import { useNLEContext } from "./NLEContext";
+import { PasteAttributesDialog } from "./PasteAttributesDialog";
 
 export interface TimelinePaneProps {
   /** Slot rendered above the timeline tracks (toolbar with split, delete, zoom) */
@@ -131,6 +132,7 @@ export function TimelinePane({
           <AudioMeterStrip />
         </div>
       </div>
+      <PasteAttributesDialog />
       {timelineFooter && <div className="shrink-0">{timelineFooter}</div>}
       {timelineOverlay && (
         <div className="pointer-events-none absolute inset-0 z-20">{timelineOverlay}</div>

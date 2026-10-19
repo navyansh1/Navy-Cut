@@ -7,6 +7,10 @@ import { isTypingTarget, ownsPlainKeys } from "../utils/typingTarget";
 import { isEditableTarget } from "../utils/timelineDiscovery";
 import { shouldIgnoreHistoryShortcut } from "../utils/studioHelpers";
 import { canSplitElement, canSplitElementAt } from "../utils/timelineElementSplit";
+import {
+  snapshotCopiedAttributes,
+  usePasteAttributesStore,
+} from "../components/nle/pasteAttributesStore";
 import { trackStudioEvent } from "../utils/studioTelemetry";
 import { STUDIO_PLAIN_KEYS } from "../player/components/studioShortcuts";
 import { openAudioGainDialog } from "../player/components/audioGainDialogStore";
@@ -103,6 +107,13 @@ export function dispatchModifierKey(
     return true;
   }
 
+  // Final Cut: ⇧⌘V opens Paste Attributes.
+  if (key === "v" && event.shiftKey && !event.altKey && !isEditableTarget(event.target)) {
+    event.preventDefault();
+    if (!cb.readOnlyPreview) usePasteAttributesStore.getState().setOpen(true);
+    return true;
+  }
+
   if (!event.shiftKey && !event.altKey && !isEditableTarget(event.target)) {
     // An active automation range owns Cmd+C/Cmd+V, same as Delete below: this
     // capture listener runs before useAutomationSelectionKeyboard's, so without
@@ -110,6 +121,7 @@ export function dispatchModifierKey(
     // downstream handler still sees it.
     if (automationOwnsKey(event)) return true;
     if (key === "c") {
+      snapshotCopiedAttributes();
       if (cb.handleCopy()) {
         event.preventDefault();
         trackStudioEvent("keyboard_shortcut", { action: "copy" });
