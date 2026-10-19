@@ -2,7 +2,7 @@
 // sub-composition (compositions/compound-N.html) and leaves one host clip in their place.
 // POST /break-apart {targetPath, hostId} reverses it. Both answer {before, after} per file for undo.
 import type { Hono } from "hono";
-import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { parseHTML } from "linkedom";
 import type { StudioApiAdapter } from "../types.js";
@@ -157,6 +157,46 @@ ${inner}
     mkdirSync(join(project.dir, "compositions"), { recursive: true });
     writeFileSync(join(project.dir, file), html);
     return c.json({ ok: true, path: file, label, html });
+  });
+
+  // Timelines in this project with their display names (data-cut-timeline on each root).
+  api.get("/projects/:id/cut/timelines", async (c) => {
+    const project = await adapter.resolveProject(c.req.param("id"));
+    if (!project) return c.json({ error: "not found" }, 404);
+    const label = (file: string, fallback: string) => {
+      const abs = join(project.dir, file);
+      if (!existsSync(abs)) return fallback;
+      const m = /data-cut-timeline="([^"]*)"/.exec(readFileSync(abs, "utf-8"));
+      return m?.[1] || fallback;
+    };
+    const dir = join(project.dir, "compositions");
+    const extra = existsSync(dir)
+      ? readdirSync(dir).filter((f) => /^timeline-.+\.html$/.test(f)).sort()
+      : [];
+    return c.json([
+      { path: "index.html", label: label("index.html", "Main Timeline") },
+      ...extra.map((f) => ({ path: `compositions/${f}`, label: label(`compositions/${f}`, f.slice(9, -5)) })),
+    ]);
+  });
+
+  // Rename a timeline: only its display name changes, so references and undo stay simple.
+  api.post("/projects/:id/cut/timeline/rename", async (c) => {
+    const project = await adapter.resolveProject(c.req.param("id"));
+    if (!project) return c.json({ error: "not found" }, 404);
+    const body = (await c.req.json().catch(() => null)) as { path?: string; name?: string } | null;
+    const name = (body?.name ?? "").trim().slice(0, 60).replace(/[<>"&]/g, "");
+    if (!body?.path || !name) return c.json({ error: "path and name required" }, 400);
+    if (body.path !== "index.html" && !/^compositions\/timeline-[^/]+\.html$/.test(body.path))
+      return c.json({ error: "not a timeline" }, 400);
+    const abs = resolveWithinProject(project.dir, body.path);
+    if (!abs || !existsSync(abs)) return c.json({ error: "not found" }, 404);
+    const before = readFileSync(abs, "utf-8");
+    const after = /data-cut-timeline="[^"]*"/.test(before)
+      ? before.replace(/data-cut-timeline="[^"]*"/, `data-cut-timeline="${name}"`)
+      : before.replace(/(<[^>]*data-composition-id="[^"]*")/, `$1 data-cut-timeline="${name}"`);
+    snapshotBeforeWrite(project.dir, abs);
+    writeFileSync(abs, after);
+    return c.json({ ok: true, before, after });
   });
 
   api.post("/projects/:id/cut/break-apart", async (c) => {

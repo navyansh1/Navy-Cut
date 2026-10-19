@@ -53,3 +53,33 @@ export async function newTimeline(name?: string): Promise<string | null> {
 if (typeof window !== "undefined") {
   (window as unknown as { __cutNewTimeline?: () => void }).__cutNewTimeline = () => void newTimeline();
 }
+
+/** Timelines with their display names, from the server. */
+export async function fetchTimelines(): Promise<TimelineEntry[]> {
+  const projectId = cutStudioBridge.projectId;
+  if (!projectId) return listTimelines();
+  try {
+    const res = await studioApiFetch(buildProjectApiPath(projectId, "/cut/timelines"));
+    const list = (await res.json()) as TimelineEntry[];
+    const main = cutStudioBridge.masterCompPath ?? "index.html";
+    return list.map((t) => (t.path === "index.html" ? { ...t, path: main } : t));
+  } catch {
+    return listTimelines();
+  }
+}
+
+export async function renameTimeline(path: string, name: string): Promise<void> {
+  const projectId = cutStudioBridge.projectId;
+  if (!projectId) return;
+  const res = await studioApiFetch(buildProjectApiPath(projectId, "/cut/timeline/rename"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...studioWriteHeaders() },
+    body: JSON.stringify({ path: path === cutStudioBridge.masterCompPath ? "index.html" : path, name }),
+  });
+  const json = (await res.json()) as { before?: string; after?: string; error?: string };
+  if (!res.ok) throw new Error(json.error ?? "Rename failed");
+  await cutStudioBridge.recordEdit?.({
+    label: "Rename Timeline",
+    files: { [path]: { before: json.before ?? "", after: json.after ?? "" } },
+  });
+}

@@ -17,6 +17,7 @@ import {
 import { readStudioUiPreferences, writeStudioUiPreferences } from "../../utils/studioUiPreferences";
 import { installDockAccessibility } from "./dockAccessibility";
 import { DockStripActions } from "./DockStripActions";
+import { DockTimelineActions } from "./DockTimelineActions";
 import { DockTab } from "./DockTab";
 import { installTabFill } from "./dockTabFill";
 import { addRegisteredPanel, applySideMinimums, buildEditLayout, buildLayoutPreset } from "./dockLayout";
@@ -237,6 +238,7 @@ function Root({
         components={COMPONENTS}
         defaultTabComponent={DockTab}
         rightHeaderActionsComponent={DockStripActions}
+        leftHeaderActionsComponent={DockTimelineActions}
         defaultRenderer="always"
         disableFloatingGroups
         disableTabsOverflowList

@@ -86,7 +86,7 @@ export function NoiseRemovalControl({
         {tab("noise", "Noise Removal")}
         {tab("voice", "Voice Isolation")}
       </div>
-      {mode === "noise" && (
+      {(
         <FlatSlider label="Amount" value={amount} min={0} max={100}
           tier={amount !== 60 ? "explicitCustom" : "default"} displayValue={`${amount}%`}
           onCommit={(v) => setAmount(Math.round(v))} onReset={() => setAmount(60)} />
@@ -114,7 +114,7 @@ export function NoiseRemovalControl({
       )}
       {applied && !job && (
         <div className="text-[10px] text-panel-text-4">
-          On: {applied[1] === "voice" ? "voice isolation" : `noise removal ${applied[2]}%`}
+          On: {applied[1] === "voice" ? "voice isolation" : "noise removal"} {applied[2]}%
         </div>
       )}
       {error && <div className="text-[10px] text-danger-ink">{error}</div>}

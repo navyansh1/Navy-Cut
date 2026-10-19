@@ -1,4 +1,3 @@
-import { TimelineSwitcher } from "./TimelineSwitcher";
 import { memo, type MouseEvent } from "react";
 import { Camera } from "../icons/SystemIcons";
 import { useStudioShellContext } from "../contexts/StudioContext";
@@ -44,7 +43,7 @@ export const StudioHeader = memo(function StudioHeader({
   inspectorPanelActive,
   onExport,
 }: StudioHeaderProps) {
-  const { projectId, renderQueue, activeCompPath } = useStudioShellContext();
+  const { projectId, renderQueue } = useStudioShellContext();
   const { rightCollapsed, setRightCollapsed, setRightPanelTab } = usePanelLayoutContext();
   const isRendering = renderQueue.isRendering;
   const ffmpegMissing = renderQueue.ffmpegMissing;
@@ -57,8 +56,7 @@ export const StudioHeader = memo(function StudioHeader({
       {/* Left: logo + project name */}
       <div className="flex items-center gap-3">
         <span className="text-step-11 font-medium text-text-1">{projectId}</span>
-        <span className="text-text-5 select-none" aria-hidden="true">/</span>
-        <TimelineSwitcher activeCompPath={activeCompPath} />
+
       </div>
       {/* Right: toolbar buttons */}
       <div className="flex items-center gap-3">
