@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import type { LayoutPreset } from "./dockLayout";
 import {
   PANEL_DEFINITIONS,
   PANEL_IDS,
@@ -18,6 +19,8 @@ export interface DockController {
   /** Hides or shows the panel's whole tab group without closing it. */
   setGroupVisible: (id: PanelId, visible: boolean) => void;
   reset: () => void;
+  /** Cut Studio: rebuild the dock as one of the named layouts. */
+  applyPreset: (preset: LayoutPreset) => void;
 }
 
 export interface DockSnapshot {
@@ -46,6 +49,16 @@ interface DockLayoutState extends DockSnapshot {
   togglePanel: (id: PanelId) => void;
   setZoneVisible: (zone: PanelZone, visible: boolean) => void;
   resetLayout: () => void;
+  layoutPreset: LayoutPreset;
+  applyLayoutPreset: (preset: LayoutPreset) => void;
+}
+
+function readSavedPreset(): LayoutPreset {
+  try {
+    return localStorage.getItem("cut-layout-preset") === "vertical" ? "vertical" : "standard";
+  } catch {
+    return "standard";
+  }
 }
 
 export const useDockLayoutStore = create<DockLayoutState>((set, get) => ({
@@ -96,7 +109,25 @@ export const useDockLayoutStore = create<DockLayoutState>((set, get) => ({
     }
   },
   resetLayout: () => get().controller?.reset(),
+  layoutPreset: readSavedPreset(),
+  applyLayoutPreset: (preset) => {
+    get().controller?.applyPreset(preset);
+    set({ layoutPreset: preset });
+    try {
+      localStorage.setItem("cut-layout-preset", preset);
+    } catch {
+      /* private mode: the layout itself is still saved by the dock */
+    }
+    // The viewer fits its frame on resize; nudge it once the new grid has laid out.
+    for (const ms of [30, 250, 800]) setTimeout(() => window.dispatchEvent(new Event("resize")), ms);
+  },
 }));
+
+// The Mac app's View menu drives layouts through this hook.
+if (typeof window !== "undefined") {
+  (window as unknown as { __cutLayout?: (p: LayoutPreset) => void }).__cutLayout = (preset) =>
+    useDockLayoutStore.getState().applyLayoutPreset(preset);
+}
 
 /** The panel of `zone` the user is looking at: the last one focused if still showing, else any showing. */
 export function visiblePanelInZone(

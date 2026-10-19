@@ -116,3 +116,47 @@ export function buildEditLayout(
   if (right) api.getPanel(right)?.group.api.setSize({ width: widths.right });
   api.getPanel("timeline")?.group.api.setSize({ height: DEFAULT_TIMELINE_H });
 }
+
+export type LayoutPreset = "standard" | "vertical";
+
+/**
+ * Cut Studio "Vertical Video" layout: the viewer is a full-height column on the right (a 9:16 frame
+ * uses the height, not the width); library and inspector sit side by side above the timeline.
+ */
+export function buildVerticalLayout(
+  api: DockviewApi,
+  viewportWidth: number,
+  panels: readonly PanelId[] = PANEL_IDS,
+) {
+  api.clear();
+  addRegisteredPanel(api, "timeline");
+  addRegisteredPanel(api, "preview", { referencePanel: "timeline", direction: "right" });
+  const [firstLeft, ...restLeft] = DEFAULT_LEFT.filter((id) => panels.includes(id));
+  if (firstLeft) {
+    addRegisteredPanel(api, firstLeft, { referencePanel: "timeline", direction: "above" });
+    for (const id of restLeft) addRegisteredPanel(api, id, { referencePanel: firstLeft, direction: "within" });
+    api.getPanel(firstLeft)?.api.setActive();
+  }
+  const [firstRight, ...restRight] = DEFAULT_RIGHT.filter((id) => panels.includes(id));
+  if (firstRight) {
+    addRegisteredPanel(api, firstRight, {
+      referencePanel: firstLeft ?? "timeline",
+      direction: firstLeft ? "right" : "above",
+    });
+    for (const id of restRight) addRegisteredPanel(api, id, { referencePanel: firstRight, direction: "within" });
+    api.getPanel(firstRight)?.api.setActive();
+  }
+  applySideMinimums(api, viewportWidth);
+  api.getPanel("preview")?.group.api.setSize({ width: Math.round(viewportWidth * 0.3) });
+  api.getPanel("timeline")?.group.api.setSize({ height: DEFAULT_TIMELINE_H });
+}
+
+export function buildLayoutPreset(
+  preset: LayoutPreset,
+  api: DockviewApi,
+  viewportWidth: number,
+  panels: readonly PanelId[] = PANEL_IDS,
+) {
+  if (preset === "vertical") buildVerticalLayout(api, viewportWidth, panels);
+  else buildEditLayout(api, viewportWidth, panels);
+}

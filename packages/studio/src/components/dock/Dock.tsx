@@ -19,7 +19,7 @@ import { installDockAccessibility } from "./dockAccessibility";
 import { DockStripActions } from "./DockStripActions";
 import { DockTab } from "./DockTab";
 import { installTabFill } from "./dockTabFill";
-import { addRegisteredPanel, applySideMinimums, buildEditLayout } from "./dockLayout";
+import { addRegisteredPanel, applySideMinimums, buildEditLayout, buildLayoutPreset } from "./dockLayout";
 import { DOCK_PANEL_COMPONENT, parseDockLayout } from "./dockLayoutSchema";
 import { useDockLayoutStore, type DockController, type DockSnapshot } from "./dockLayoutStore";
 import {
@@ -126,6 +126,7 @@ function createController(api: DockviewApi, options: DockOptions): DockControlle
     setTitle: (id, title) => api.getPanel(id)?.api.setTitle(title),
     setGroupVisible: (id, visible) => api.getPanel(id)?.group.api.setVisible(visible),
     reset: () => buildEditLayout(api, options.dockWidth(), options.panels),
+    applyPreset: (preset) => buildLayoutPreset(preset, api, options.dockWidth(), options.panels),
   };
 }
 
@@ -265,6 +266,8 @@ function WindowMenu() {
   const panels = useDockLayoutStore((state) => state.panels);
   const togglePanel = useDockLayoutStore((state) => state.togglePanel);
   const resetLayout = useDockLayoutStore((state) => state.resetLayout);
+  const layoutPreset = useDockLayoutStore((state) => state.layoutPreset);
+  const applyLayoutPreset = useDockLayoutStore((state) => state.applyLayoutPreset);
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -289,7 +292,32 @@ function WindowMenu() {
         Window
       </button>
       {open && (
-        <div role="menu" className={`${menuClasses.panel} absolute right-0 top-8 z-50 w-44`}>
+        <div role="menu" className={`${menuClasses.panel} absolute right-0 top-8 z-50 w-52`}>
+          <div className="px-3 pb-1 pt-1.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-neutral-500">
+            Workspaces
+          </div>
+          {(
+            [
+              ["standard", "Standard"],
+              ["vertical", "Vertical Video (viewer right)"],
+            ] as const
+          ).map(([preset, label]) => (
+            <button
+              key={preset}
+              type="button"
+              role="menuitemradio"
+              aria-checked={layoutPreset === preset}
+              onClick={() => {
+                applyLayoutPreset(preset);
+                setOpen(false);
+              }}
+              className={`${menuClasses.row} ${menuClasses.rowEnabled} flex items-center gap-2`}
+            >
+              <span className="w-3 text-accent-ink">{layoutPreset === preset ? "✓" : ""}</span>
+              {label}
+            </button>
+          ))}
+          <div className={menuClasses.divider} />
           {panels.map((id) => (
             <button
               key={id}
