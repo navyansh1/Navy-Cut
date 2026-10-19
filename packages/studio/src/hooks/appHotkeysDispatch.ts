@@ -9,6 +9,7 @@ import { shouldIgnoreHistoryShortcut } from "../utils/studioHelpers";
 import { canSplitElement, canSplitElementAt } from "../utils/timelineElementSplit";
 import { breakApartCompoundClip, makeCompoundClip } from "../utils/cutCompoundClips";
 import { makeMulticamClip, switchMulticamAngle } from "../utils/cutMulticam";
+import { newTimeline } from "../utils/cutTimelines";
 import {
   snapshotCopiedAttributes,
   usePasteAttributesStore,
@@ -98,6 +99,16 @@ export function dispatchModifierKey(
     event.preventDefault();
     trackStudioEvent("keyboard_shortcut", { action: "tab_assets" });
     useDockLayoutStore.getState().activatePanel("assets");
+    return true;
+  }
+
+  // ⌘N: New Timeline (Final Cut: New Project).
+  if (key === "n" && !event.shiftKey && !event.altKey && !isTypingTarget(event.target)) {
+    event.preventDefault();
+    if (cb.readOnlyPreview) return true;
+    void newTimeline()
+      .then((msg) => msg && cb.showToast(msg, "info"))
+      .catch((e: Error) => cb.showToast(e.message, "error"));
     return true;
   }
 

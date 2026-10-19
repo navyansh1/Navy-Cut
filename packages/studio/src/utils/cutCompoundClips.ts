@@ -12,7 +12,10 @@ import { findTimelineElementInIframe } from "../hooks/timelineEditingHelpers";
 export const cutStudioBridge: {
   projectId: string | null;
   recordEdit: ((entry: RecordEditInput) => Promise<void>) | null;
-} = { projectId: null, recordEdit: null };
+  fileTree: string[];
+  masterCompPath: string | null;
+  selectComposition: ((path: string) => void) | null;
+} = { projectId: null, recordEdit: null, fileTree: [], masterCompPath: null, selectComposition: null };
 
 function selection(): TimelineElement[] {
   const { elements, selectedElementId, selectedElementIds } = usePlayerStore.getState();

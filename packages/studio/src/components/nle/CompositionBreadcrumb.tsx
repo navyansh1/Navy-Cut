@@ -17,6 +17,8 @@ interface CompositionBreadcrumbProps {
 
 export function CompositionBreadcrumb({ stack, onNavigate }: CompositionBreadcrumbProps) {
   if (stack.length <= 1) return null;
+  // Cut Studio: a top-level timeline is not nested in Master — the top-bar switcher names it.
+  if (stack.length === 2 && JSON.stringify(stack[1]).includes("timeline-")) return null;
 
   return (
     <nav

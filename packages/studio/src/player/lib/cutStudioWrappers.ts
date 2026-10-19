@@ -8,6 +8,8 @@ export function dropMediaWrappers(
   elements: TimelineElement[],
   doc: Document | null,
 ): TimelineElement[] {
+  // An open Cut Studio timeline's own root is not a clip on it.
+  elements = elements.filter((el) => !/(^|\/)timeline-[^/]+\.html:#root/.test(el.key ?? el.id));
   if (!doc) return elements;
   return elements.filter((el) => {
     if (el.kind === "composition" || el.compositionSrc) return true;

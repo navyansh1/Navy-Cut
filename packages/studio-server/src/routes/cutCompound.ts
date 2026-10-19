@@ -117,6 +117,48 @@ ${inner}
     return c.json({ ok: true, hostId: name, compositionPath: compPath, before, after, compHtml });
   });
 
+  // New Timeline: an empty timeline the size of the main one, as its own composition file.
+  api.post("/projects/:id/cut/timeline", async (c) => {
+    const project = await adapter.resolveProject(c.req.param("id"));
+    if (!project) return c.json({ error: "not found" }, 404);
+    const body = (await c.req.json().catch(() => null)) as { name?: string } | null;
+    const label = (body?.name ?? "").trim().slice(0, 60) || "Untitled Timeline";
+    const slug = label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "timeline";
+    let file = `compositions/timeline-${slug}.html`;
+    for (let n = 2; existsSync(join(project.dir, file)); n++) file = `compositions/timeline-${slug}-${n}.html`;
+    const id = file.replace(/^compositions\//, "").replace(/\.html$/, "");
+    const mainPath = join(project.dir, "index.html");
+    let width = "1920";
+    let height = "1080";
+    if (existsSync(mainPath)) {
+      const main = parseHTML(readFileSync(mainPath, "utf-8")).document.querySelector("[data-composition-id]");
+      width = main?.getAttribute("data-width") ?? width;
+      height = main?.getAttribute("data-height") ?? height;
+    }
+    const safeLabel = label.replace(/[<>"&]/g, "");
+    const html = `<!doctype html>
+<html>
+  <head><meta charset="UTF-8" /></head>
+  <body>
+    <template>
+      <style>
+        #root { position: absolute; inset: 0; overflow: hidden; background: #000; }
+        #root > video, #root > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+      </style>
+      <div id="root" data-composition-id="${id}" data-cut-timeline="${safeLabel}" data-width="${width}" data-height="${height}" data-duration="10"></div>
+      <script>
+        window.__timelines = window.__timelines || {};
+        window.__timelines["${id}"] = gsap.timeline({ paused: true });
+      </script>
+    </template>
+  </body>
+</html>
+`;
+    mkdirSync(join(project.dir, "compositions"), { recursive: true });
+    writeFileSync(join(project.dir, file), html);
+    return c.json({ ok: true, path: file, label, html });
+  });
+
   api.post("/projects/:id/cut/break-apart", async (c) => {
     const project = await adapter.resolveProject(c.req.param("id"));
     if (!project) return c.json({ error: "not found" }, 404);

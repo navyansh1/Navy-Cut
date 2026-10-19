@@ -140,6 +140,9 @@ export function StudioApp({ readOnlyPreview = false, readOnlyPreviewReason }: St
       setEditingFile: fileManager.setEditingFile,
       showToast,
     });
+  cutStudioBridge.fileTree = fileManager.fileTree;
+  cutStudioBridge.masterCompPath = masterCompPath;
+  cutStudioBridge.selectComposition = handleSelectComposition;
   const { sdkHandle, editFlowSdkSession } = useStudioSdkSessions(
     projectId,
     activeCompPath,
