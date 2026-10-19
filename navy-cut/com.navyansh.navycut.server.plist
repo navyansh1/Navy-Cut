@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.navyansh.navycut.server</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>__BUN__</string><string>--bun</string><string>./node_modules/.bin/vite</string>
+    <string>--host</string><string>127.0.0.1</string><string>--port</string><string>5190</string><string>--strictPort</string>
+  </array>
+  <key>WorkingDirectory</key><string>__STUDIO__</string>
+  <key>EnvironmentVariables</key>
+  <dict><key>PATH</key><string>__HOME__/.bun/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin</string></dict>
+  <key>RunAtLoad</key><false/>
+  <key>KeepAlive</key><false/>
+  <key>StandardOutPath</key><string>__HOME__/Library/Logs/Navy Cut.log</string>
+  <key>StandardErrorPath</key><string>__HOME__/Library/Logs/Navy Cut.log</string>
+</dict>
+</plist>

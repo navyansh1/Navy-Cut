@@ -1,0 +1,8 @@
+Navy Cut
+Copyright 2026 Navyansh
+
+This product is a modified version of HyperFrames (https://github.com/heygen-com/hyperframes),
+licensed under the Apache License, Version 2.0. Modifications (2026-10) add a Final Cut Pro–style
+editing interface, audio and video tools, and a native macOS app; they are marked "Cut Studio" /
+"Navy Cut" in the source and live mainly in packages/studio, packages/studio-server, packages/core
+and navy-cut/.
