@@ -29,6 +29,7 @@ import { useColorGradingController } from "./useColorGradingController";
 import { usePlayerStore } from "../../player";
 import { isFocusedEaseRequestCurrent } from "../../player/store/keyframeSlice";
 import { AudioEnhancementsPanel } from "./AudioEnhancementsPanel";
+import { StabilizationControl } from "./StabilizationControl";
 import {
   FlatColorGradingAccessory,
   FlatColorGradingSection,
@@ -428,6 +429,20 @@ export function PropertyPanelFlat({
           onSetAttribute={onSetAttribute}
           onSetAttributes={onSetAttributes}
           {...(gsapEffectHandlers ?? EMPTY_GSAP_EFFECT_HANDLERS)}
+        />
+      ),
+    });
+  }
+  if (isFootage && element.tagName.toLowerCase() === "video") {
+    groups.push({
+      id: "video",
+      title: "Video",
+      summary: /\.stab-\d+\.mp4$/.test(element.element.getAttribute("src") ?? "") ? "stabilized" : "stabilization",
+      content: (
+        <StabilizationControl
+          element={element}
+          onSetAttributeQuiet={(onSetAttributeQuiet ?? onSetAttributeLive)!}
+          onSetHtmlAttribute={forwardedProps.onSetHtmlAttribute}
         />
       ),
     });

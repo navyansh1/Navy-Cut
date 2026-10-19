@@ -1,7 +1,7 @@
 import { cutStudioBridge } from "./utils/cutCompoundClips";
 import { useOwnPreviewIframe, usePreviewIframeStore } from "./player/store/previewIframeStore";
 import { buildProjectApiPath } from "./utils/projectRouting";
-import { useState, useCallback, useRef, useMemo, type SetStateAction } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo, type SetStateAction } from "react";
 import { useStableHandlers } from "./hooks/useStableHandlers";
 import { useHistoryFlags, useToolbarSession } from "./hooks/useShellSlices";
 import { useDismissingTabSetter, useRightPanelIntent } from "./hooks/useRightPanelIntents";
@@ -98,6 +98,12 @@ export function StudioApp({ readOnlyPreview = false, readOnlyPreviewReason }: St
     timelineElements,
   );
   const { toasts, showToast, dismissToast } = useToast();
+  // Cut Studio features outside React's tree report through this event.
+  useEffect(() => {
+    const onToast = (e: Event) => showToast(String((e as CustomEvent).detail), "info");
+    window.addEventListener("cut-studio-toast", onToast);
+    return () => window.removeEventListener("cut-studio-toast", onToast);
+  }, [showToast]);
   const panelLayout = usePanelLayout({
     rightCollapsed: initialUrlStateRef.current.rightCollapsed,
     rightPanelTab: initialUrlStateRef.current.rightPanelTab,

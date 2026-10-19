@@ -1,3 +1,4 @@
+import { detectSceneCuts } from "../../utils/cutScenes";
 import { memo, useLayoutEffect, useState, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import { usePlayerStore, type TimelineElement } from "../store/playerStore";
@@ -161,6 +162,22 @@ export const ClipContextMenu = memo(function ClipContextMenu({
           >
             <span>{splitLabel}</span>
             <span className="text-neutral-500 text-[10px] ml-3">{splitShortcut}</span>
+          </button>
+        )}
+        {element.tag === "video" && (
+          <button
+            type="button"
+            role="menuitem"
+            className={itemClass(true)}
+            onClick={() => {
+              onClose();
+              void detectSceneCuts(element, onSplit).then(
+                (msg) => window.dispatchEvent(new CustomEvent("cut-studio-toast", { detail: msg })),
+                (e: Error) => window.dispatchEvent(new CustomEvent("cut-studio-toast", { detail: e.message })),
+              );
+            }}
+          >
+            <span>Detect Scene Cuts</span>
           </button>
         )}
         {tools && splitLabel && (
