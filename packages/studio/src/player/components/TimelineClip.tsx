@@ -19,6 +19,7 @@ import { clipSpeedSuffix } from "./clipToolAttrs";
 import { ClipPeakTooltip } from "./ClipPeakTooltip";
 import { timeLayerPercent } from "./TimelineTimeLayer";
 import { MulticamCutMarks } from "./MulticamCutMarks";
+import { ClipVolumeLine } from "./ClipVolumeLine";
 
 interface TimelineClipProps {
   el: TimelineElement;
@@ -270,6 +271,9 @@ export const TimelineClip = memo(function TimelineClip({
         </span>
       )}
       {el.compositionSrc && /(^|\/)multicam-\d+\.html/.test(el.compositionSrc) && <MulticamCutMarks el={el} />}
+      {!isGestureActor && (isAudioClip || Boolean(el.hasAudio)) && !el.muted && (
+        <ClipVolumeLine el={el} isAudioClip={isAudioClip} />
+      )}
       <ClipFadesContext.Provider value={hasFades ? fade.shape : null}>
         {children}
       </ClipFadesContext.Provider>

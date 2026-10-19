@@ -14,7 +14,7 @@ export function shouldSeekOnPointerDown(e: PointerEvent | React.PointerEvent): b
   if (e.button !== 0 || e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return false;
   const t = e.target as HTMLElement | null;
   if (!t?.closest?.('[role="grid"], [data-timeline-zoom-scale]')) return false;
-  if (t.closest('[role="rowheader"], button:not([data-clip]), input, select, [data-keyframe], [data-timeline-keyframe], .timeline-fade-handle')) return false;
+  if (t.closest('[role="rowheader"], button:not([data-clip]), input, select, [data-keyframe], [data-timeline-keyframe], .timeline-fade-handle, [data-volume-line] .cut-volume-line')) return false;
   for (let n: HTMLElement | null = t; n && !n.dataset?.clip; n = n.parentElement) {
     if (getComputedStyle(n).cursor === "col-resize") return false;   // trim handle
   }

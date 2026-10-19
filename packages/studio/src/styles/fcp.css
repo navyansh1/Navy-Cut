@@ -99,3 +99,21 @@
 .timeline-clip[data-fcp-kind="video"] .timeline-fade-handle {
   top: calc(var(--timeline-clip-band-height) + (100% - var(--timeline-clip-band-height)) / 2 - 12px) !important;
 }
+
+/* Final Cut volume line across the waveform. The strip covers the waveform area only. */
+.cut-volume-strip { position: absolute; left: 0; right: 0; bottom: 0; z-index: 25; pointer-events: none; }
+.cut-volume-strip.is-audio { top: 4px; }
+.cut-volume-strip.is-video { top: calc(var(--timeline-clip-band-height) + (100% - var(--timeline-clip-band-height)) / 2); }
+.cut-volume-line {
+  position: absolute; left: 0; right: 0; height: 9px; margin-top: -4.5px; cursor: ns-resize; pointer-events: auto;
+}
+.cut-volume-line::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 4px; height: 1.5px;
+  background: rgb(255 255 255 / 0.85); box-shadow: 0 0 2px rgb(0 0 0 / 0.6);
+}
+.timeline-clip:not(.is-hovered):not(.is-selected) .cut-volume-line::before { background: rgb(255 255 255 / 0.45); }
+.cut-volume-line:hover::before, .cut-volume-line.is-dragging::before { background: var(--fcp-select); height: 2px; }
+.cut-volume-readout {
+  position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); white-space: nowrap;
+  padding: 1px 6px; border-radius: 4px; background: rgb(0 0 0 / 0.8); color: #fff; font: 600 10px/16px var(--font-mono);
+}
