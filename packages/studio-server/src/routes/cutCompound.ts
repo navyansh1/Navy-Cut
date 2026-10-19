@@ -4,6 +4,7 @@
 import type { Hono } from "hono";
 import { existsSync, readFileSync, readdirSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
+import { homedir } from "node:os";
 import { parseHTML } from "linkedom";
 import type { StudioApiAdapter } from "../types.js";
 import { resolveWithinProject } from "../helpers/safePath.js";
@@ -159,6 +160,19 @@ ${inner}
     return c.json({ ok: true, path: file, label, html });
   });
 
+  // Recent projects, recorded by the Navy Cut app each time a project is opened.
+  api.get("/cut/recent-projects", async (c) => {
+    const file = join(homedir(), "Library", "Application Support", "Cut Studio", "recent-projects.json");
+    let list: Array<{ id: string; title: string; dir: string; marker?: string; opened?: number }> = [];
+    try {
+      list = JSON.parse(readFileSync(file, "utf-8"));
+    } catch {
+      list = [];
+    }
+    const linked = new Set((await adapter.listProjects()).map((p) => p.id));
+    return c.json(list.filter((p) => existsSync(p.dir) && linked.has(p.id)));
+  });
+
   // Timelines in this project with their display names (data-cut-timeline on each root).
   api.get("/projects/:id/cut/timelines", async (c) => {
     const project = await adapter.resolveProject(c.req.param("id"));
@@ -174,8 +188,8 @@ ${inner}
       ? readdirSync(dir).filter((f) => /^timeline-.+\.html$/.test(f)).sort()
       : [];
     return c.json([
-      { path: "index.html", label: label("index.html", "Main Timeline") },
-      ...extra.map((f) => ({ path: `compositions/${f}`, label: label(`compositions/${f}`, f.slice(9, -5)) })),
+      { path: "index.html", label: label("index.html", "Timeline 1") },
+      ...extra.map((f, i) => ({ path: `compositions/${f}`, label: label(`compositions/${f}`, `Timeline ${i + 2}`) })),
     ]);
   });
 

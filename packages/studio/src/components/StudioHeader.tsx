@@ -1,3 +1,4 @@
+import { ProjectSwitcher } from "./ProjectSwitcher";
 import { memo, type MouseEvent } from "react";
 import { Camera } from "../icons/SystemIcons";
 import { useStudioShellContext } from "../contexts/StudioContext";
@@ -55,7 +56,7 @@ export const StudioHeader = memo(function StudioHeader({
     >
       {/* Left: logo + project name */}
       <div className="flex items-center gap-3">
-        <span className="text-step-11 font-medium text-text-1">{projectId}</span>
+        <ProjectSwitcher projectId={projectId} />
 
       </div>
       {/* Right: toolbar buttons */}

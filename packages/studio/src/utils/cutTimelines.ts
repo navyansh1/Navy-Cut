@@ -23,14 +23,14 @@ export function listTimelines(): TimelineEntry[] {
         .replace(/-/g, " ")
         .replace(/\b\w/g, (c) => c.toUpperCase()),
     }));
-  return [{ path: main, label: "Main Timeline" }, ...extra];
+  return [{ path: main, label: "Timeline 1" }, ...extra];
 }
 
 export async function newTimeline(name?: string): Promise<string | null> {
   const projectId = cutStudioBridge.projectId;
   if (!projectId) return null;
-  const label = name ?? window.prompt("New timeline name", `Timeline ${listTimelines().length + 1}`);
-  if (!label) return null;
+  // FCP-quick: a new timeline is named "Timeline N" straight away; double-click its name to rename.
+  const label = name ?? `Timeline ${(await fetchTimelines()).length + 1}`;
   const res = await studioApiFetch(buildProjectApiPath(projectId, "/cut/timeline"), {
     method: "POST",
     headers: { "Content-Type": "application/json", ...studioWriteHeaders() },

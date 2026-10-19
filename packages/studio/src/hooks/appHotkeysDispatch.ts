@@ -10,6 +10,7 @@ import { canSplitElement, canSplitElementAt } from "../utils/timelineElementSpli
 import { breakApartCompoundClip, makeCompoundClip } from "../utils/cutCompoundClips";
 import { makeMulticamClip, switchMulticamAngle } from "../utils/cutMulticam";
 import { newTimeline } from "../utils/cutTimelines";
+import { fitTimelineNow } from "../utils/cutFitTimeline";
 import {
   snapshotCopiedAttributes,
   usePasteAttributesStore,
@@ -261,6 +262,13 @@ export function dispatchPlainKey(event: KeyboardEvent, key: string, cb: HotkeyCa
       event.preventDefault();
       return;
     }
+  }
+
+  // Final Cut: ⇧Z fits the whole timeline in the window.
+  if (event.shiftKey && !event.altKey && event.code === "KeyZ") {
+    event.preventDefault();
+    fitTimelineNow();
+    return;
   }
 
   // Final Cut multicam: 1–4 cut & switch the angle at the playhead, ⇧1–4 choose the audio angle.

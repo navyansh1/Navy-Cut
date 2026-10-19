@@ -1,3 +1,4 @@
+import { fitTimelineNow } from "../utils/cutFitTimeline";
 import { memo, useEffect, useRef, type ReactNode } from "react";
 import {
   ArrowsOutLineHorizontal,
@@ -487,10 +488,10 @@ export const TimelineToolbar = memo(function TimelineToolbar({
               <Image size={16} aria-hidden="true" />
             </button>
           </Tooltip>
-          <Tooltip label="Fit timeline to width">
+          <Tooltip label="Fit timeline to width (⇧Z)">
             <button
               type="button"
-              onClick={() => setZoomMode("fit")}
+              onClick={fitTimelineNow}
               aria-label="Fit timeline to width"
               aria-pressed={zoomMode === "fit"}
               className={`h-7 px-2 rounded-md text-[11px] font-medium transition-colors ${

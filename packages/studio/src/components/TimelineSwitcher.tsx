@@ -31,7 +31,7 @@ export function TimelineSwitcher({ activeCompPath }: { activeCompPath: string | 
   };
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="relative flex items-center">
       {renaming ? (
         <input
           autoFocus
@@ -60,8 +60,21 @@ export function TimelineSwitcher({ activeCompPath }: { activeCompPath: string | 
           title="Switch timeline · double-click to rename · ⌘N for a new one"
         >
           <span className="text-[#f5c33b]">▤</span>
-          {current?.label ?? "Main Timeline"}
+          {current?.label ?? "Timeline 1"}
           <span className="text-neutral-500">▾</span>
+        </button>
+      )}
+      {!renaming && (
+        <button
+          type="button"
+          aria-label="New timeline"
+          title="New timeline (⌘N)"
+          onClick={() =>
+            void newTimeline().then((m) => (m ? (toast(m), refresh()) : undefined), (e: Error) => toast(e.message))
+          }
+          className="ml-0.5 flex h-6 w-6 items-center justify-center rounded-md text-[15px] leading-none text-neutral-400 hover:bg-neutral-800 hover:text-[#f5c33b]"
+        >
+          +
         </button>
       )}
       {open &&
@@ -101,7 +114,7 @@ export function TimelineSwitcher({ activeCompPath }: { activeCompPath: string | 
               }}
               className={`${menuClasses.row} ${menuClasses.rowEnabled} flex items-center justify-between`}
             >
-              <span>New Timeline…</span>
+              <span>New Timeline</span>
               <span className="text-[10px] text-neutral-500">⌘N</span>
             </button>
             <button
