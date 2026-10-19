@@ -1,4 +1,4 @@
-import { memo, useContext, type MouseEvent } from "react";
+import { memo, type MouseEvent } from "react";
 import { Camera } from "../icons/SystemIcons";
 import { useStudioShellContext } from "../contexts/StudioContext";
 import { usePanelLayoutContext } from "../contexts/PanelLayoutContext";
@@ -6,9 +6,6 @@ import { trackStudioEvent } from "../utils/studioTelemetry";
 import { Button, buttonBase, buttonSizes, buttonVariants, cn, Tooltip } from "./ui";
 import { Dock } from "./dock/Dock";
 import { InspectorIcon } from "./icons/InspectorIcon";
-import { OpenInDesktopButton } from "./OpenInDesktopButton";
-import { HyperframesLogo } from "./ui/HyperframesLogo";
-import { ShowThemeToggle, ThemeToggle } from "./ThemeToggle";
 
 interface StudioHeaderProps {
   captureFrameHref: string;
@@ -46,7 +43,6 @@ export const StudioHeader = memo(function StudioHeader({
   inspectorPanelActive,
   onExport,
 }: StudioHeaderProps) {
-  const showThemeToggle = useContext(ShowThemeToggle);
   const { projectId, renderQueue } = useStudioShellContext();
   const { rightCollapsed, setRightCollapsed, setRightPanelTab } = usePanelLayoutContext();
   const isRendering = renderQueue.isRendering;
@@ -56,10 +52,6 @@ export const StudioHeader = memo(function StudioHeader({
     <div className="flex items-center justify-between h-10 px-3 bg-surface border-b border-border-strong shrink-0">
       {/* Left: logo + project name */}
       <div className="flex items-center gap-3">
-        <HyperframesLogo />
-        <span className="text-text-5 select-none" aria-hidden="true">
-          |
-        </span>
         <span className="text-step-11 font-medium text-text-1">{projectId}</span>
       </div>
       {/* Right: toolbar buttons */}
@@ -150,9 +142,7 @@ export const StudioHeader = memo(function StudioHeader({
             </Button>
           </Tooltip>
         </div>
-        {showThemeToggle && <ThemeToggle />}
         <Dock.WindowMenu />
-        <OpenInDesktopButton />
         <Tooltip
           label={
             ffmpegMissing

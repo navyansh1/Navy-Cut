@@ -2136,6 +2136,13 @@ export function initSandboxRuntimeModular(): void {
         }
         return false;
       };
+      // Cut Studio: a wrapper around authored clips (PiP box, zoom layer) is a transform on
+      // those clips, not a clip of its own — FCP never shows one, so don't stamp it.
+      const wrapsAuthoredClips = (element: HTMLElement): boolean => {
+        for (const timed of authoredTimed)
+          if (timed !== element && element.contains(timed)) return true;
+        return false;
+      };
 
       // Stamp GSAP-targeted elements
       if (state.capturedTimeline.getChildren) {
@@ -2148,6 +2155,7 @@ export function initSandboxRuntimeModular(): void {
               if (isAudioGroupBus(target)) continue;
               if (target.hasAttribute("data-start")) continue;
               if (hasAuthoredTimedAncestor(target)) continue;
+              if (wrapsAuthoredClips(target)) continue;
               if (seen.has(target)) continue;
               seen.add(target);
               target.setAttribute("data-start", "0");
@@ -2171,6 +2179,7 @@ export function initSandboxRuntimeModular(): void {
           if (el === rootComp) continue;
           if (el.hasAttribute("data-start")) continue;
           if (hasAuthoredTimedAncestor(el)) continue;
+          if (wrapsAuthoredClips(el)) continue;
           if (seen.has(el)) continue;
           if (el.tagName === "SCRIPT" || el.tagName === "STYLE" || el.tagName === "LINK") continue;
           if (isAudioGroupBus(el)) continue;
@@ -3987,7 +3996,7 @@ export function initSandboxRuntimeModular(): void {
     if (!Number.isFinite(parsed) || parsed <= 0) {
       state.playbackRate = 1;
     } else {
-      state.playbackRate = Math.max(0.1, Math.min(5, parsed));
+      state.playbackRate = Math.max(0.1, Math.min(16, parsed));
     }
     state.mediaForceSyncNextTick = true;
     if (state.capturedTimeline && typeof state.capturedTimeline.timeScale === "function") {

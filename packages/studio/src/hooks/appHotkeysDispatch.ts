@@ -6,7 +6,7 @@ import { useDockLayoutStore } from "../components/dock/dockLayoutStore";
 import { isTypingTarget, ownsPlainKeys } from "../utils/typingTarget";
 import { isEditableTarget } from "../utils/timelineDiscovery";
 import { shouldIgnoreHistoryShortcut } from "../utils/studioHelpers";
-import { canSplitElement } from "../utils/timelineElementSplit";
+import { canSplitElement, canSplitElementAt } from "../utils/timelineElementSplit";
 import { trackStudioEvent } from "../utils/studioTelemetry";
 import { STUDIO_PLAIN_KEYS } from "../player/components/studioShortcuts";
 import { openAudioGainDialog } from "../player/components/audioGainDialogStore";
@@ -134,6 +134,27 @@ export function dispatchModifierKey(
         trackStudioEvent("keyboard_shortcut", { action: "cut" });
         void cb.handleCut();
       }
+      return true;
+    }
+    if (key === "b") {
+      // Final Cut Pro: Cmd+B blades at the playhead — the selected clip when it
+      // spans the playhead, otherwise every video/audio clip under the playhead.
+      event.preventDefault();
+      if (cb.readOnlyPreview) return true;
+      const { selectedElementId, elements, currentTime } = usePlayerStore.getState();
+      const selected = selectedElementId
+        ? elements.find((e) => (e.key ?? e.id) === selectedElementId)
+        : undefined;
+      const targets =
+        selected && canSplitElementAt(selected, currentTime)
+          ? [selected]
+          : elements.filter(
+              (e) => (e.tag === "video" || e.tag === "audio") && canSplitElementAt(e, currentTime),
+            );
+      trackStudioEvent("keyboard_shortcut", { action: "blade" });
+      void (async () => {
+        for (const el of targets) await cb.handleTimelineElementSplit(el, currentTime);
+      })();
       return true;
     }
     if (key === "d") {

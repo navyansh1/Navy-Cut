@@ -75,7 +75,7 @@ export function useTimelineProviderState({
   splitShortcut,
   theme: themeOverrides,
   showAudioEffects = true,
-  showKeyframes = true,
+  showKeyframes = false, // Cut Studio: keyframes live in the inspector, as in FCP
   trackPadding,
   sessionEpoch: sessionEpochProp,
   previewIframeRef,
@@ -150,7 +150,8 @@ export function useTimelineProviderState({
     () => getEffectiveTimelineDuration(duration, timelineElements),
     [duration, timelineElements],
   );
-  useAutoExpandKeyframedClips(gsapAnimations);
+  // Cut Studio: no auto-expanded keyframe lanes (FCP keeps keyframes in the inspector).
+  void useAutoExpandKeyframedClips;
   const {
     tracks,
     trackStyles,

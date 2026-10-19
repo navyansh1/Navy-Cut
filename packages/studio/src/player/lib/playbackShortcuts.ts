@@ -71,7 +71,9 @@ export function shouldIgnorePlaybackShortcutEvent(
     selectedCaptionSegmentCount: 0,
   },
 ): boolean {
-  if (event.metaKey || event.ctrlKey || event.altKey) return true;
+  // Cmd+L is an alias for L (shuttle forward); every other modified key is ignored.
+  const cmdL = event.metaKey && !event.ctrlKey && !event.altKey && event.code === "KeyL";
+  if ((event.metaKey || event.ctrlKey || event.altKey) && !cmdL) return true;
   if (shouldIgnorePlaybackShortcutTarget(event.target)) return true;
   if (isModalDialogOpen()) return true;
   return (
@@ -81,5 +83,5 @@ export function shouldIgnorePlaybackShortcutEvent(
   );
 }
 
-/** JKL shuttle speeds (×1, ×2, ×4). */
-export const SHUTTLE_SPEEDS = [1, 2, 4] as const;
+/** JKL shuttle speeds, as in Final Cut Pro (×1, ×2, ×4, ×8, ×16). */
+export const SHUTTLE_SPEEDS = [1, 2, 4, 8, 16] as const;

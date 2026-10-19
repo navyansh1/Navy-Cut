@@ -47,6 +47,15 @@ interface TimelineClipProps {
 
 const HANDLES_MIN_PX = 32;
 
+/** Final Cut Pro clip colour family: blue video, green audio, purple titles/graphics, teal compound clips. */
+export function fcpClipKind(el: TimelineElement, isAudio: boolean, isComposition: boolean): string {
+  if (isAudio) return "audio";
+  if (el.compositionSrc && /(^|\/)compound-/.test(el.compositionSrc)) return "compound";
+  if (isComposition) return "title";
+  if (el.tag === "img") return "still";
+  return "video";
+}
+
 const CLIP_MIN_WIDTH_PX = 4;
 export const clipWidthPx = (el: TimelineElement, pps: number) =>
   Math.max(el.duration * pps, CLIP_MIN_WIDTH_PX);
@@ -87,7 +96,12 @@ export const TimelineClip = memo(function TimelineClip({
 }: TimelineClipProps) {
   const widthPx = clipWidthPx(el, pps);
   const handleOpacity = getClipHandleOpacity({ isHovered, isSelected, isDragging });
-  const displayLabel = `${el.label || el.id || el.tag}${clipSpeedSuffix(el.playbackRate, el.automation)}`;
+  // Final Cut shows a media clip by its file name.
+  const fileName =
+    (el.tag === "video" || el.tag === "audio" || el.tag === "img") && el.src
+      ? decodeURIComponent(el.src.split(/[?#]/)[0]!.split("/").pop() ?? "")
+      : "";
+  const displayLabel = `${fileName || el.label || el.id || el.tag}${clipSpeedSuffix(el.playbackRate, el.automation)}`;
   const isAudioClip = isAudioTimelineElement(el);
   const ladder = clipWidthLadder(widthPx);
   const showHandles = handleOpacity > 0.01 && (widthPx >= HANDLES_MIN_PX || isSelected);
@@ -154,6 +168,7 @@ export const TimelineClip = memo(function TimelineClip({
       data-clip-hidden={el.hidden ? "true" : undefined}
       data-link-color={linkColor ?? undefined}
       data-ladder={ladder}
+      data-fcp-kind={fcpClipKind(el, isAudioClip, isComposition)}
       data-active={isActive ? "" : undefined}
       aria-hidden={isGestureActor ? "true" : undefined}
       tabIndex={isGestureActor ? undefined : tabIndex}

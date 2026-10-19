@@ -2,6 +2,7 @@
 @import "./palette-reset.css";
 @import "./theme.css";
 @import "./components.css";
+@import "./fcp.css";
 
 /* Explicit sources: Studio's own TypeScript and its shell HTML. Automatic
  * detection would walk up to the repo root and scan `data/projects`, gitignored user content. */

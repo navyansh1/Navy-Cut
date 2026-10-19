@@ -9,18 +9,19 @@ import {
 } from "./studioUiPreferences";
 
 export function savedStudioTheme(): StudioTheme {
-  return readStudioUiPreferences().theme ?? "light";
+  // FCP fork: always dark.
+  void readStudioUiPreferences;
+  return "dark";
 }
 
 export function shownStudioTheme(): StudioTheme {
   return document.documentElement.dataset.theme === "paper" ? "light" : "dark";
 }
 
-export function setStudioTheme(theme: StudioTheme): void {
-  writeStudioUiPreferences({ theme });
-  const root = document.documentElement;
-  if (theme === "light") root.dataset.theme = "paper";
-  else delete root.dataset.theme;
+export function setStudioTheme(_theme: StudioTheme): void {
+  // FCP fork: always dark, whatever is asked.
+  writeStudioUiPreferences({ theme: "dark" });
+  delete document.documentElement.dataset.theme;
 }
 
 function subscribe(listener: () => void): () => void {

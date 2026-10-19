@@ -573,6 +573,9 @@ export function collectRuntimeTimelinePayload(params: {
           if (range.start === Infinity || range.end === -Infinity) continue;
           const el = element as HTMLElement;
           if (gsapClipIds.has(el.id)) continue;
+          // Cut Studio: an animated wrapper around timed media (a PiP box, a zoom layer) is a
+          // transform on those clips, not a clip of its own — keep it off the timeline, as FCP does.
+          if (el.querySelector("[data-start]")) continue;
           const duration = Math.max(0, range.end - range.start);
           if (duration <= 0) continue;
           const clampedDuration = clampDurationToRootWindow(range.start, duration);

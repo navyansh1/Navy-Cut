@@ -1,0 +1,78 @@
+/* Final Cut Pro look for the Studio timeline (Cut Studio fork).
+   Colours sampled from FCP 11's dark timeline: blue video, green audio, purple titles/generators,
+   teal compound clips, a yellow selection ring and a graphite background. */
+:root {
+  --fcp-bg: #1e1e1f;
+  --fcp-row: #232324;
+  --fcp-ruler: #2b2b2d;
+  --fcp-line: rgb(255 255 255 / 0.06);
+  --fcp-video: #3d5f99;
+  --fcp-video-band: #2f4c7d;
+  --fcp-audio: #2f7a4f;
+  --fcp-audio-wave: 172, 236, 196;
+  --fcp-title: #6b4fa8;
+  --fcp-title-band: #57408c;
+  --fcp-compound: #2f7f86;
+  --fcp-compound-band: #24666c;
+  --fcp-still: #4f6b92;
+  --fcp-select: #f5c33b;
+
+  --timeline-shell-bg: var(--fcp-bg);
+  --timeline-row-bg: var(--fcp-row);
+  --timeline-row-border: var(--fcp-line);
+  --timeline-gutter-bg: var(--fcp-bg);
+  --timeline-gutter-border: var(--fcp-line);
+  --timeline-ruler-border: rgb(255 255 255 / 0.1);
+  --timeline-clip-radius: 5px;
+  --timeline-clip-audio-radius: 5px;
+  --timeline-clip-band-height: 16px;
+  --timeline-clip-shadow: none;
+  --timeline-clip-selection: var(--fcp-select);
+  --timeline-clip-audio-bg: var(--fcp-audio);
+  --timeline-clip-audio-border: #3c9a64;
+  --timeline-clip-audio-bg-hover: #358a59;
+  --timeline-clip-chip-audio-bg: transparent;
+  --timeline-waveform-bar-rgb: var(--fcp-audio-wave);
+  --timeline-waveform-baseline-rgb: var(--fcp-audio-wave);
+  --timeline-handle: var(--fcp-select);
+}
+
+.timeline-clip[data-fcp-kind] {
+  border: 1px solid rgb(0 0 0 / 0.55);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.12);
+}
+.timeline-clip[data-fcp-kind="video"] { background-color: var(--fcp-video); }
+.timeline-clip[data-fcp-kind="video"] .timeline-clip__label { background: var(--fcp-video-band); }
+.timeline-clip[data-fcp-kind="still"] { background-color: var(--fcp-still); }
+.timeline-clip[data-fcp-kind="title"] { background-color: var(--fcp-title); }
+.timeline-clip[data-fcp-kind="title"] .timeline-clip__label { background: var(--fcp-title-band); }
+.timeline-clip[data-fcp-kind="compound"] { background-color: var(--fcp-compound); }
+.timeline-clip[data-fcp-kind="compound"] .timeline-clip__label { background: var(--fcp-compound-band); }
+.timeline-clip[data-fcp-kind="compound"] .timeline-clip__name::before { content: "⧉ "; }
+.timeline-clip[data-fcp-kind="audio"] { background-color: var(--fcp-audio); }
+.timeline-clip[data-fcp-kind="audio"] .timeline-clip__label { background: transparent; text-shadow: 0 1px 2px rgb(0 0 0 / 0.7); }
+
+.timeline-clip[data-fcp-kind] .timeline-clip__label {
+  color: rgb(255 255 255 / 0.92);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+/* No green/teal "active" wash; FCP only marks the selection. */
+.timeline-clip[data-fcp-kind]::before { display: none; }
+.timeline-clip[data-fcp-kind][data-active] { border-color: rgb(0 0 0 / 0.55); }
+.timeline-clip[data-fcp-kind].is-hovered { filter: brightness(1.1); }
+
+/* Yellow selection ring, thicker on the edges — FCP's trim brackets. */
+.timeline-clip[data-fcp-kind].is-selected,
+.timeline-clip[data-fcp-kind][data-active].is-selected {
+  outline: 2px solid var(--fcp-select);
+  outline-offset: -1px;
+  z-index: 12 !important;
+}
+.timeline-clip[data-fcp-kind] .timeline-clip__handle-bar {
+  width: 4px !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  border-radius: 0 !important;
+  background: var(--fcp-select) !important;
+}

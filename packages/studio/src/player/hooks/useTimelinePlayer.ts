@@ -1,3 +1,4 @@
+import { dropMediaWrappers } from "../lib/cutStudioWrappers";
 import { useRef, useCallback, useEffect } from "react";
 import { usePlayerStore, liveTime, type TimelineElement } from "../store/playerStore";
 import { useMountEffect } from "../../hooks/useMountEffect";
@@ -90,6 +91,7 @@ export function useTimelinePlayer({
       // Enforced CapCut zoning (overlay → main → audio): normalize track indices
       // on every discovery. Idempotent — already-zoned input is returned as-is, so
       // drops persist zoned indices and reloads re-zone to the same (no drift).
+      elements = dropMediaWrappers(elements, iframeRef.current?.contentDocument ?? null);
       const mergedElements = normalizeToZones(
         applyCachedSourceDurations(
           mergeTimelineElementsPreservingDowngrades(
