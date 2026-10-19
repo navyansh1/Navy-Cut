@@ -19,12 +19,16 @@ export interface CompositionDimensions {
   height: number;
 }
 
+type ExportFormat = "mp4" | "webm" | "mov" | "audio-m4a" | "audio-wav";
+
 export type StartRenderHandler = (
   format: "mp4" | "webm" | "mov",
   quality: "draft" | "standard" | "high",
   resolution: ResolutionPreset | "auto",
-  fps: 24 | 30 | 60,
+  fps: number,
   gpu?: boolean,
+  /** Cut Studio finishing pass: "720p", "audio-m4a" or "audio-wav". */
+  finish?: string,
 ) => void | Promise<void>;
 
 export interface RenderQueueProps {
@@ -60,12 +64,13 @@ export interface RenderQueueProps {
 // Orientation is derived from the composition's authored aspect ratio,
 // not chosen by the user — picking "1080p portrait" for a landscape comp
 // would just produce a wrong-aspect render.
-type RenderScale = "auto" | "1080p" | "4k";
+type RenderScale = "auto" | "720p" | "1080p" | "4k";
 
-const SCALE_OPTION_ORDER: RenderScale[] = ["auto", "1080p", "4k"];
+const SCALE_OPTION_ORDER: RenderScale[] = ["auto", "720p", "1080p", "4k"];
 
 const SCALE_LABEL: Record<RenderScale, string> = {
   auto: "Auto",
+  "720p": "720p",
   "1080p": "1080p",
   "4k": "4K",
 };
@@ -85,7 +90,7 @@ function resolveResolution(
   scale: RenderScale,
   dims: CompositionDimensions | null | undefined,
 ): ResolutionPreset | "auto" {
-  if (scale === "auto") return "auto";
+  if (scale === "auto" || scale === "720p") return "auto";
   const aspect = compAspect(dims);
   if (scale === "1080p") return aspect;
   return aspect === "landscape"
@@ -100,6 +105,7 @@ function resolvedDimensions(
   dims: CompositionDimensions | null | undefined,
 ): CompositionDimensions | null {
   if (scale === "auto") return dims ?? null;
+  if (scale === "720p" && dims) return { width: Math.round((dims.width * 720) / dims.height / 2) * 2, height: 720 };
   const preset = resolveResolution(scale, dims);
   return preset === "auto" ? null : CANVAS_DIMENSIONS[preset];
 }
@@ -111,7 +117,7 @@ function resolvedDimensions(
 // render time — e.g. 1080p on a 1080×1080 square or 1080p on a 1280×720 comp
 // (1.5× isn't integer).
 function scaleApplies(scale: RenderScale, dims: CompositionDimensions | null | undefined): boolean {
-  if (scale === "auto" || dims == null) return true;
+  if (scale === "auto" || scale === "720p" || dims == null) return true;
   const preset = resolveResolution(scale, dims);
   if (preset === "auto") return true;
   const target = CANVAS_DIMENSIONS[preset];
@@ -136,7 +142,7 @@ function scaleOptionLabel(
   return base;
 }
 
-const FORMAT_INFO: Record<"mp4" | "webm" | "mov", { label: string; desc: string }> = {
+const FORMAT_INFO: Record<ExportFormat, { label: string; desc: string }> = {
   mp4: { label: "MP4", desc: "Best for general use. Smallest file, universal playback." },
   mov: {
     label: "MOV (ProRes 4444)",
@@ -146,6 +152,8 @@ const FORMAT_INFO: Record<"mp4" | "webm" | "mov", { label: string; desc: string 
     label: "WebM (VP9)",
     desc: "Transparent video for web. Smaller than MOV but limited editor support.",
   },
+  "audio-m4a": { label: "Audio only (M4A)", desc: "The mix as AAC 256 kb/s, no picture." },
+  "audio-wav": { label: "Audio only (WAV)", desc: "The mix as uncompressed 24-bit WAV, no picture." },
 };
 
 // Estimated, like COLOR_PICKER_SIZE in propertyPanelColor: only the flip
@@ -158,7 +166,7 @@ const FORMAT_PANEL_SIZE = { width: 208, height: 150 };
 // for the one-line ui/Tooltip primitive, so this stays a local popover.
 // It renders in a portal because the right panel is overflow-hidden: an
 // in-flow absolute panel gets clipped at the panel edge.
-function FormatInfoTooltip({ format }: { format: "mp4" | "webm" | "mov" }) {
+function FormatInfoTooltip({ format }: { format: ExportFormat }) {
   const [open, setOpen] = useState(false);
   const [position, setPosition] = useState<FloatingPosition | null>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
@@ -264,6 +272,8 @@ const FORMAT_OPTIONS: SelectOption[] = [
   { value: "mp4", label: "MP4" },
   { value: "mov", label: "MOV (ProRes)" },
   { value: "webm", label: "WebM" },
+  { value: "audio-m4a", label: "Audio only (M4A)" },
+  { value: "audio-wav", label: "Audio only (WAV)" },
 ];
 
 const QUALITY_OPTIONS: SelectOption[] = [
@@ -274,7 +284,9 @@ const QUALITY_OPTIONS: SelectOption[] = [
 
 const FPS_OPTIONS: SelectOption[] = [
   { value: "24", label: "24 fps" },
+  { value: "25", label: "25 fps" },
   { value: "30", label: "30 fps" },
+  { value: "50", label: "50 fps" },
   { value: "60", label: "60 fps" },
 ];
 
@@ -301,10 +313,10 @@ function FormatExportButton({
   onRecheckFfmpeg: () => void;
 }) {
   const persisted = getPersistedRenderSettings();
-  const [format, setFormat] = useState<"mp4" | "webm" | "mov">(persisted.format);
+  const [format, setFormat] = useState<ExportFormat>(persisted.format);
   const [quality, setQuality] = useState<"draft" | "standard" | "high">(persisted.quality);
   const [resolution, setResolution] = useState<RenderScale>("auto");
-  const [fps, setFps] = useState<24 | 30 | 60>(persisted.fps);
+  const [fps, setFps] = useState<number>(persisted.fps);
   const [gpu, setGpu] = useState(persisted.gpu);
 
   // Only a definite "not installed" blocks Export. A null status means the
@@ -314,7 +326,8 @@ function FormatExportButton({
   const missingFfmpeg = ffmpeg && !ffmpeg.ok ? ffmpeg : null;
 
   // MOV (ProRes) is a fixed-quality codec — quality selector has no effect.
-  const showQuality = format !== "mov";
+  const isAudioOnly = format === "audio-m4a" || format === "audio-wav";
+  const showQuality = format !== "mov" && !isAudioOnly;
 
   return (
     <div className="flex flex-col gap-3">
@@ -337,7 +350,7 @@ function FormatExportButton({
             options={FORMAT_OPTIONS}
             disabled={isRendering}
             onCommit={(next) => {
-              const v = next as "mp4" | "webm" | "mov";
+              const v = next as ExportFormat;
               setFormat(v);
               persistRenderSettings(v, quality, fps);
             }}
@@ -365,7 +378,7 @@ function FormatExportButton({
             options={FPS_OPTIONS}
             disabled={isRendering}
             onCommit={(next) => {
-              const v = Number(next) as 24 | 30 | 60;
+              const v = Number(next);
               setFps(v);
               persistRenderSettings(format, quality, v);
             }}
@@ -389,7 +402,7 @@ function FormatExportButton({
         )}
       </div>
       <GpuEncodingToggle
-        format={format}
+        format={isAudioOnly ? "mov" : format}
         checked={gpu}
         disabled={isRendering}
         onToggle={() => {
@@ -409,8 +422,10 @@ function FormatExportButton({
           // double-click in the same frame from enqueueing two renders.
           if (isRendering || missingFfmpeg) return;
           const outputResolution = resolveResolution(resolution, compositionDimensions);
+          const finish = isAudioOnly ? format : resolution === "720p" ? "720p" : undefined;
+          const renderFormat = isAudioOnly ? "mp4" : format;
           trackStudioEvent("render_start", { format, quality, resolution: outputResolution, fps });
-          void onStartRender(format, quality, outputResolution, fps, gpu);
+          void onStartRender(renderFormat, quality, outputResolution, fps, gpu, finish);
         }}
         // Width only. A type size or a weight here would win the merge against
         // the size recipe and leave this Export a step away from the header's

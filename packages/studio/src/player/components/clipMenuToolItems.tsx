@@ -242,9 +242,60 @@ function FreezeFrameItem({ element, currentTime, onClose }: Omit<ClipMenuToolIte
   );
 }
 
-/** Freeze (time), Voice (sound), Look and Crop (picture). */
+/** Final Cut's Retime menu: slow/fast presets that also stretch or shrink the clip. */
+const RETIME_SECTIONS: readonly ChoiceSection[] = [
+  {
+    heading: "Slow",
+    choices: [
+      { id: "0.1", label: "10%" },
+      { id: "0.25", label: "25%" },
+      { id: "0.5", label: "50%" },
+    ],
+  },
+  { choices: [{ id: "1", label: "Normal (100%)" }] },
+  {
+    heading: "Fast",
+    choices: [
+      { id: "2", label: "2×" },
+      { id: "4", label: "4×" },
+      { id: "8", label: "8×" },
+    ],
+  },
+];
+
+function RetimeItem({ element, onClose }: Omit<ClipMenuToolItemsProps, "group" | "currentTime">) {
+  const { onSetElementAttributeQuiet } = useTimelineEditContextOptional();
+  const tag = element.tag.trim().toLowerCase();
+  if (!onSetElementAttributeQuiet || (tag !== "video" && tag !== "audio")) return null;
+  const rate = element.playbackRate && element.playbackRate > 0 ? element.playbackRate : 1;
+  return (
+    <ChoiceSubmenu
+      label="Speed"
+      sections={RETIME_SECTIONS}
+      activeId={String(rate)}
+      onPick={(id) => {
+        const next = Number(id ?? "1");
+        // Same source span at the new rate: the clip gets longer when slowed, shorter when sped up.
+        const duration = Math.max(1 / 30, (element.duration * rate) / next);
+        void (async () => {
+          await onSetElementAttributeQuiet(element, "data-playback-rate", String(next), "Speed");
+          await onSetElementAttributeQuiet(element, "data-duration", duration.toFixed(4), "Speed");
+        })();
+        onClose();
+      }}
+    />
+  );
+}
+
+/** Freeze and Speed (time), Voice (sound), Look and Crop (picture). */
 export function ClipMenuToolItems(props: ClipMenuToolItemsProps) {
-  if (props.group === "time") return <FreezeFrameItem {...props} />;
+  if (props.group === "time")
+    return (
+      <>
+        <RetimeItem element={props.element} onClose={props.onClose} />
+        <FreezeFrameItem {...props} />
+      </>
+    );
   return <ClipMenuAttributeItems {...props} />;
 }
 

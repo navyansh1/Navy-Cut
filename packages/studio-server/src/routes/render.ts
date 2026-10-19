@@ -14,12 +14,15 @@ import {
 import { projectDirMissing } from "../helpers/projectDirMissing.js";
 import { isVariablesPayload, VARIABLES_PAYLOAD_ERROR } from "../helpers/variablesPayload.js";
 import { parseEncoderOptions, type EncoderOptionsBody } from "../helpers/encoderOptions.js";
+import { attachFinish, CUT_FINISHES, type CutFinish } from "../helpers/cutFinish.js";
 
 const VALID_RESOLUTIONS = new Set<string>(VALID_CANVAS_RESOLUTIONS);
 const RENDER_MIME: Record<string, string> = {
   ".mp4": "video/mp4",
   ".webm": "video/webm",
   ".mov": "video/quicktime",
+  ".m4a": "audio/mp4",
+  ".wav": "audio/wav",
 };
 const RENDER_EXTENSIONS = Object.keys(RENDER_MIME);
 const RENDER_ARTIFACT_EXTENSIONS = [...RENDER_EXTENSIONS, ".meta.json"];
@@ -108,6 +111,8 @@ export function registerRenderRoutes(api: Hono, adapter: StudioApiAdapter): void
       // window.__hfVariables — same channel as `hyperframes render --variables`.
       variables?: Record<string, unknown>;
       gpu?: boolean;
+      /** Cut Studio finishing pass: "720p", "audio-m4a" or "audio-wav". */
+      finish?: string;
     };
     const VALID_FORMATS = new Set(["mp4", "webm", "mov"]);
     const FORMAT_EXT: Record<string, string> = { mp4: ".mp4", webm: ".webm", mov: ".mov" };
@@ -173,6 +178,7 @@ export function registerRenderRoutes(api: Hono, adapter: StudioApiAdapter): void
         typeof body.telemetryDistinctId === "string" ? body.telemetryDistinctId : undefined,
       telemetryOptOut: body.telemetryOptOut === true,
     });
+    if (CUT_FINISHES.has(body.finish ?? "")) attachFinish(jobState, body.finish as CutFinish);
     (jobState as RenderJobState & { createdAt: number }).createdAt = Date.now();
     renderJobs.set(jobId, jobState as RenderJobState & { createdAt: number });
 

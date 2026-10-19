@@ -33,6 +33,8 @@ export interface StartRenderOptions {
   /** `"auto"` (default) renders at the composition's authored dimensions. */
   resolution?: ResolutionPreset | "auto";
   gpu?: boolean;
+  /** Cut Studio finishing pass: "720p", "audio-m4a" or "audio-wav". */
+  finish?: string;
   /**
    * Render a specific composition file. Omit it to render the composition the
    * user currently has open — only the sidebar's per-composition Render button
@@ -236,6 +238,7 @@ export function useRenderQueue(
         composition?: string;
         variables?: Record<string, unknown>;
         gpu?: boolean;
+        finish?: string;
         telemetryDistinctId?: string;
         telemetryOptOut?: boolean;
       } = {
@@ -261,6 +264,7 @@ export function useRenderQueue(
       if (resolution && resolution !== "auto") body.resolution = resolution;
       if (composition) body.composition = composition;
       if (opts.gpu) body.gpu = true;
+      if (opts.finish) body.finish = opts.finish;
       if (opts.variables && Object.keys(opts.variables).length > 0) {
         body.variables = opts.variables;
       }
