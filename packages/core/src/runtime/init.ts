@@ -2183,6 +2183,8 @@ export function initSandboxRuntimeModular(): void {
           if (seen.has(el)) continue;
           if (el.tagName === "SCRIPT" || el.tagName === "STYLE" || el.tagName === "LINK") continue;
           if (isAudioGroupBus(el)) continue;
+          // Cut Studio: runtime-owned helpers (__hf_color_grading_* canvases) are not clips.
+          if (el.id.startsWith("__hf_")) continue;
           seen.add(el);
           el.setAttribute("data-start", "0");
           el.setAttribute("data-duration", dur);

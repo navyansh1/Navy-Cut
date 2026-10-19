@@ -7,6 +7,7 @@ import { isTypingTarget, ownsPlainKeys } from "../utils/typingTarget";
 import { isEditableTarget } from "../utils/timelineDiscovery";
 import { shouldIgnoreHistoryShortcut } from "../utils/studioHelpers";
 import { canSplitElement, canSplitElementAt } from "../utils/timelineElementSplit";
+import { breakApartCompoundClip, makeCompoundClip } from "../utils/cutCompoundClips";
 import {
   snapshotCopiedAttributes,
   usePasteAttributesStore,
@@ -102,6 +103,13 @@ export function dispatchModifierKey(
   if (key === "g" && !event.altKey && !isTypingTarget(event.target)) {
     event.preventDefault();
     if (cb.readOnlyPreview) return true;
+    if (event.shiftKey) {
+      // Final Cut: ⇧⌘G breaks a compound clip apart; anything else keeps Ungroup.
+      void breakApartCompoundClip()
+        .then((msg) => (msg ? cb.showToast(msg, "info") : cb.onUngroupSelection?.()))
+        .catch((e: Error) => cb.showToast(e.message, "error"));
+      return true;
+    }
     if (event.shiftKey) cb.onUngroupSelection?.();
     else cb.onGroupSelection?.();
     return true;
@@ -230,6 +238,16 @@ export function dispatchPlainKey(event: KeyboardEvent, key: string, cb: HotkeyCa
       event.preventDefault();
       return;
     }
+  }
+
+  // Final Cut: ⌥G makes a compound clip from the selection.
+  if (event.altKey && !event.shiftKey && event.code === "KeyG") {
+    event.preventDefault();
+    if (cb.readOnlyPreview) return;
+    void makeCompoundClip()
+      .then((msg) => cb.showToast(msg, "info"))
+      .catch((e: Error) => cb.showToast(e.message, "error"));
+    return;
   }
 
   if (key === "b" && !event.shiftKey && !event.altKey) {

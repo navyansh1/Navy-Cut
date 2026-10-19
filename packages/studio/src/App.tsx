@@ -1,3 +1,4 @@
+import { cutStudioBridge } from "./utils/cutCompoundClips";
 import { useOwnPreviewIframe, usePreviewIframeStore } from "./player/store/previewIframeStore";
 import { buildProjectApiPath } from "./utils/projectRouting";
 import { useState, useCallback, useRef, useMemo, type SetStateAction } from "react";
@@ -102,6 +103,8 @@ export function StudioApp({ readOnlyPreview = false, readOnlyPreviewReason }: St
     rightPanelTab: initialUrlStateRef.current.rightPanelTab,
   });
   const editHistory = useStableHandlers(usePersistentEditHistory({ projectId }), projectId);
+  cutStudioBridge.projectId = projectId;
+  cutStudioBridge.recordEdit = editHistory.recordEdit;
   const handleDomZIndexReorderCommitRef = useRef<TimelineZIndexReorderCommit | null>(null);
   const pendingTimelineEditPathRef = useRef(new Set<string>());
   const isGestureRecordingRef = useRef(false);
