@@ -24,7 +24,7 @@ import { mkdirWithinProject, realpath, realProjectRoot } from "./safePath.js";
  * caller, and drops the copy while it is still queued with no caller left.
  */
 
-export const PROXY_PARAMS_VERSION = "v5";
+export const PROXY_PARAMS_VERSION = "v7"; // Cut Studio: short GOP, CRF 23, heavy/external media
 
 export const CACHE_DIR_NAME = ".transcode-cache";
 
@@ -389,7 +389,10 @@ export function clearFailedTranscodesForTest(): void {
 
 /** Even dimensions; with a box, the source shrinks until its tighter side fills the box, never grows. */
 function proxyScaleFilter(box?: PreviewProxyBox): string {
-  if (!box) return "scale=trunc(iw/2)*2:trunc(ih/2)*2";
+  // Cut Studio: preview proxies stay light — never more than 1280 px on the long side.
+  if (!box || Math.max(box.width, box.height) > 1280) {
+    return "scale='trunc(min(1\\,1280/max(iw\\,ih))*iw/2)*2':'trunc(min(1\\,1280/max(iw\\,ih))*ih/2)*2'";
+  }
   const factor = `min(1\\,max(${box.width}/iw\\,${box.height}/ih))`;
   const side = (d: string) => `min(trunc(${d}/2)*2\\,ceil(${d}*${factor}/2)*2)`;
   return `scale=${side("iw")}:${side("ih")}`;
@@ -451,9 +454,14 @@ async function runFfmpeg(
       "-color_trc",
       "bt709",
       "-crf",
-      "18",
+      "23",
       "-preset",
       "veryfast",
+      // keyframe every 0.5 s at 30 fps: a cut lands on a decodable frame at once (no black flash)
+      "-g",
+      "15",
+      "-keyint_min",
+      "15",
       "-c:a",
       "aac",
       "-movflags",

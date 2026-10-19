@@ -269,8 +269,13 @@ export async function probeAssetCodec(
     rememberProbeResult(cache, filePath, cached);
     return cached.facts;
   }
-  const facts = await probeCodecFacts(filePath, runner);
-  if (facts === undefined) return null;
+  const probed = await probeCodecFacts(filePath, runner);
+  if (probed === undefined) return null;
+  // Cut Studio: like Final Cut's proxy media, also proxy heavy or external-drive footage for preview —
+  // a 1 GB file streamed from a USB drive by many clips at once made playback slow and cuts flash black.
+  // Export always reads the original.
+  const heavy = Number(stat.size) > 150 * 1024 * 1024 || target.startsWith("/Volumes/");
+  const facts = probed && heavy && !probed.browserHostile ? { ...probed, browserHostile: true } : probed;
   rememberProbeResult(cache, filePath, { target, mtimeMs: stat.mtimeMs, size: stat.size, facts });
   return facts;
 }

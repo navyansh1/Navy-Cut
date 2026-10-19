@@ -81,8 +81,10 @@ export function resolveLinkMenuItems(input: {
   const linked = members.length > 1;
   if (canDetachAudio(element)) {
     items.push({
-      label: "Detach audio",
-      shortcut: "⌥⇧D",
+      // Final Cut "Expand Audio": the sound becomes its own linked clip under the video, so its edges
+      // trim separately for J and L cuts while the two still move together.
+      label: "Expand Audio (J/L cuts)",
+      shortcut: "⌃S",
       run: () => onLinkEdit({ kind: "detach", element }),
     });
   }

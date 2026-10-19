@@ -1,4 +1,5 @@
 import { fitTimelineNow } from "../utils/cutFitTimeline";
+import { cutStudioBridge } from "../utils/cutCompoundClips";
 import { memo, useEffect, useRef, type ReactNode } from "react";
 import {
   ArrowsOutLineHorizontal,
@@ -187,6 +188,7 @@ export const TimelineToolbar = memo(function TimelineToolbar({
     willExtend: keyframeWillExtend,
     onToggle: onToggleKeyframe,
   } = useKeyframeToggle(domEditSession);
+  cutStudioBridge.enableKeyframes = onToggleKeyframe ?? null;
 
   // Wire the "Add keyframe (K)" shortcut the toolbar advertises. Active only when
   // there's a keyframeable selection; otherwise K stays JKL-pause in playback.

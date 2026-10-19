@@ -81,3 +81,21 @@
 .timeline-clip[data-fcp-kind="multicam"] { background-color: #35518a; }
 .timeline-clip[data-fcp-kind="multicam"] .timeline-clip__label { background: #2a4170; }
 .timeline-clip[data-fcp-kind="multicam"] .timeline-clip__name::before { content: "▦ "; }
+
+/* Final Cut fade handles: round dots sitting on the top edge of the waveform, at both ends. */
+.timeline-clip[data-fcp-kind] .timeline-fade-tab {
+  width: 10px !important;
+  height: 10px !important;
+  border-radius: 50% !important;
+  background: #fff !important;
+  box-shadow: 0 0 0 1.5px rgb(0 0 0 / 0.65), 0 1px 4px rgb(0 0 0 / 0.5) !important;
+  transform: translate(-3px, 2px);
+}
+.timeline-clip[data-fcp-kind] .timeline-fade-handle:hover .timeline-fade-tab,
+.timeline-clip[data-fcp-kind] .timeline-fade-handle[data-dragging] .timeline-fade-tab {
+  background: var(--fcp-select) !important;
+}
+/* On a video with sound, the waveform is the lower half of the picture area: put the dots on its top edge. */
+.timeline-clip[data-fcp-kind="video"] .timeline-fade-handle {
+  top: calc(var(--timeline-clip-band-height) + (100% - var(--timeline-clip-band-height)) / 2 - 12px) !important;
+}

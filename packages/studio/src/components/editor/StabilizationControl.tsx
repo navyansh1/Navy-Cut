@@ -62,7 +62,7 @@ export function StabilizationControl({
 
   return (
     <div className="space-y-1.5 px-3 pb-3 pt-2">
-      <div className="mb-1 text-[9px] font-semibold uppercase tracking-[0.12em] text-panel-text-5">Stabilization</div>
+      <div className="mb-1 text-[11px] font-semibold text-panel-text-1">Stabilization</div>
       <FlatSlider label="Amount" value={amount} min={0} max={100}
         tier={amount !== 60 ? "explicitCustom" : "default"} displayValue={`${amount}%`}
         onCommit={(v) => setAmount(Math.round(v))} onReset={() => setAmount(60)} />
@@ -90,7 +90,6 @@ export function StabilizationControl({
       )}
       {applied && !job && <div className="text-[10px] text-panel-text-4">On: {applied[1]}%</div>}
       {error && <div className="text-[10px] text-danger-ink">{error}</div>}
-      <div className="pt-1 text-[10px] text-panel-text-5">Right-click the clip → Detect Scene Cuts to split it at every shot change.</div>
     </div>
   );
 }

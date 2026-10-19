@@ -14,7 +14,7 @@ type KeyframeEntry = Array<{
   ease?: string;
 }> | null;
 
-interface GeometryRowsProps {
+export interface GeometryRowsProps {
   element: DomEditSelection;
   displayX: number;
   displayY: number;
@@ -41,7 +41,7 @@ interface GeometryRowsProps {
   onConvertToKeyframes?: (animId: string) => void;
 }
 
-function KeyframeGutter({
+export function KeyframeGutter({
   element,
   property,
   displayValue,

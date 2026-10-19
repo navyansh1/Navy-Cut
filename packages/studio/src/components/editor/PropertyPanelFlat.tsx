@@ -30,6 +30,7 @@ import { usePlayerStore } from "../../player";
 import { isFocusedEaseRequestCurrent } from "../../player/store/keyframeSlice";
 import { AudioEnhancementsPanel } from "./AudioEnhancementsPanel";
 import { StabilizationControl } from "./StabilizationControl";
+import { FlatVideoInspector } from "./FlatVideoInspector";
 import {
   FlatColorGradingAccessory,
   FlatColorGradingSection,
@@ -137,8 +138,8 @@ export function PropertyPanelFlat({
   // Cut Studio: footage opens on Color, like Final Cut's Color inspector.
   const isFootage = /^(video|img)$/i.test(element.tagName);
   const [openGroupId, setOpenGroupId] = useState<string>(() =>
-    isFootage && sections.colorGrading
-      ? "grade"
+    isFootage
+      ? "video"
       : /^audio$/i.test(element.tagName) && sections.audioFx
         ? "audio-fx"
       : isTextEditableSelection(element)
@@ -433,17 +434,38 @@ export function PropertyPanelFlat({
       ),
     });
   }
-  if (isFootage && element.tagName.toLowerCase() === "video") {
+  if (isFootage) {
     groups.push({
       id: "video",
       title: "Video",
-      summary: /\.stab-\d+\.mp4$/.test(element.element.getAttribute("src") ?? "") ? "stabilized" : "stabilization",
+      summary: "transform · crop · opacity",
       content: (
-        <StabilizationControl
+        <FlatVideoInspector
           element={element}
-          onSetAttributeQuiet={(onSetAttributeQuiet ?? onSetAttributeLive)!}
-          onSetHtmlAttribute={forwardedProps.onSetHtmlAttribute}
-        />
+          styles={styles}
+          onSetStyle={onSetStyle}
+          displayX={displayX}
+          displayY={displayY}
+          displayR={displayR}
+          commitManualOffset={commitManualOffset}
+          commitManualRotation={commitManualRotation}
+          gsapAnimId={gsapAnimId}
+          navKeyframes={navKeyframes}
+          currentPct={currentPct}
+          seekFromKfPct={seekFromKfPct}
+          animIdForProp={animIdForProp}
+          onCommitAnimatedProperty={onCommitAnimatedProperty}
+          onRemoveKeyframe={onRemoveKeyframe}
+          onConvertToKeyframes={onConvertToKeyframes}
+        >
+          {element.tagName.toLowerCase() === "video" && (
+            <StabilizationControl
+              element={element}
+              onSetAttributeQuiet={(onSetAttributeQuiet ?? onSetAttributeLive)!}
+              onSetHtmlAttribute={forwardedProps.onSetHtmlAttribute}
+            />
+          )}
+        </FlatVideoInspector>
       ),
     });
   }

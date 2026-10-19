@@ -15,7 +15,9 @@ export const cutStudioBridge: {
   fileTree: string[];
   masterCompPath: string | null;
   selectComposition: ((path: string) => void) | null;
-} = { projectId: null, recordEdit: null, fileTree: [], masterCompPath: null, selectComposition: null };
+  /** The toolbar's "Add keyframe at playhead": turns a static clip into a keyframed one. */
+  enableKeyframes: (() => void | Promise<void>) | null;
+} = { projectId: null, recordEdit: null, fileTree: [], masterCompPath: null, selectComposition: null, enableKeyframes: null };
 
 function selection(): TimelineElement[] {
   const { elements, selectedElementId, selectedElementIds } = usePlayerStore.getState();

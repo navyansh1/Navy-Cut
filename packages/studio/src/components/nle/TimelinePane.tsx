@@ -7,6 +7,7 @@ import { AudioMeterStrip } from "./AudioMeterStrip";
 import { useTimelineEditContext } from "../../contexts/TimelineEditContext";
 import { useNLEContext } from "./NLEContext";
 import { PasteAttributesDialog } from "./PasteAttributesDialog";
+import { shouldSeekOnPointerDown, timeAtClientX } from "../../player/lib/cutClickToSeek";
 
 export interface TimelinePaneProps {
   /** Slot rendered above the timeline tracks (toolbar with split, delete, zoom) */
@@ -92,6 +93,11 @@ export function TimelinePane({
     >
       <div
         className="flex flex-col flex-1 min-h-0 overflow-hidden"
+        onPointerDownCapture={(e) => {
+          if (timelineDisabled || !shouldSeekOnPointerDown(e)) return;
+          const t = timeAtClientX(e.currentTarget, e.clientX);
+          if (t != null && Number.isFinite(t)) seek(Math.max(0, t));
+        }}
         onDoubleClick={(e) => {
           if ((e.target as HTMLElement).closest("[data-clip]")) return;
           if (timelineDisabled) return;

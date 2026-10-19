@@ -5,7 +5,7 @@ import type { TimelineTimeRange } from "../lib/timelineClipIndex";
 /* ── Layout constants ──────────────────────────────────────────────── */
 export const GUTTER = 32;
 export const LABEL_COL_W = 232;
-export const TRACK_H = 48;
+export const TRACK_H = 64; // Cut Studio: FCP-height clips so thumbnails and waveforms read
 export const LANE_H = 28;
 export const RULER_H = 24;
 export const CLIP_Y = 3;

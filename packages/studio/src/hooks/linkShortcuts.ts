@@ -13,7 +13,8 @@ const hasMod = (event: KeyboardEvent) => event.metaKey || event.ctrlKey;
 
 const SHORTCUTS: ReadonlyArray<[string, (event: KeyboardEvent) => boolean]> = [
   ["⌘L", (e) => hasMod(e) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === "l"],
-  ["⌥⇧D", (e) => !hasMod(e) && e.altKey && e.shiftKey && e.code === "KeyD"],
+  // Final Cut's Expand Audio is ⌃S; ⌥⇧D (Studio's Detach audio) still works.
+  ["⌃S", (e) => (e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey && e.code === "KeyS") || (!hasMod(e) && e.altKey && e.shiftKey && e.code === "KeyD")],
   ["⌥⌫", (e) => !hasMod(e) && e.altKey && !e.shiftKey && isDeleteKey(e)],
 ];
 
